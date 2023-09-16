@@ -22,7 +22,7 @@
         </div>
         <button class="form__button" id="insertData" type="submit">Continue</button>
         <p class="form__text">
-            <a href="#" class="form__link">Forgot your password?</a>
+            <a href="#" id="linkForgotPassword" class="form__link">Forgot password?</a>
         </p>
         <p class="form__text">
             <a class="form__link" id="linkCreateAccount">Dont have an account? Create account</a>
@@ -67,6 +67,19 @@
                 <a class="form__link" id="linkLogin">Already have an account? Sign in</a>
             </p>
         </form>
+        <form class="form form--hidden" id="forgotPassword">
+            <h1 class="form__title" id="forgotPasswordTitle">Forgot Password</h1>
+            <div class="form__message form__message--error"></div>
+            <div class="form__input-group">
+                <input type="text" id="forgotEmail" class="form__input" autofocus placeholder="Enter Email Address">
+                <div class="form__input--error-message"></div>
+            </div>
+            <div class="form__input-group">
+                <input type="text" id="forgotUserName" class="form__input" autofocus placeholder="Enter User Name">
+                <div class="form__input--error-message"></div>
+            </div>
+            <button class="form__button" id="newPassword">Send New Passowrd</button>
+        </form>
     </div>
     <script src="./src/main.js"></script>
 </body>
@@ -78,8 +91,8 @@
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-    import { getDatabase, set, ref, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+    import { getDatabase, set, ref, update, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
 
     // TODO: Add SDKs for Firebase products that you want to use
@@ -97,6 +110,26 @@
       appId: "1:1067050664646:web:c07f85156618fcbb59cdc7",
       measurementId: "G-7L55RX7DM3"
     };
+
+    async function checkEmailUser(email, userName) {
+        const usersRef = ref(database, 'users');
+        const usersSnapshot = await get(usersRef);
+
+        if (usersSnapshot.exists()) {
+            const users = usersSnapshot.val();
+
+        for (const userId in users) {
+            const user = users[userId];
+            if (user.email === email && user.username === userName) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
   
     function rearrangeDate(originalDate) {
         // Split the original date into an array of parts: [YYYY, MM, DD]
@@ -170,12 +203,14 @@
 document.addEventListener("DOMContentLoaded", () => {
     const loginForm = document.querySelector("#login");
     const createAccountForm = document.querySelector("#createAccount");
+    const forgotPasswordForm = document.querySelector("#forgotPassword")
 
     //on click hides createaccount form and adds loginform
     document.querySelector("#linkCreateAccount").addEventListener("click", e => {
         e.preventDefault();
         loginForm.classList.add("form--hidden");
         createAccountForm.classList.remove("form--hidden");
+        forgotPasswordForm.classList.add("form--hidden");
     });
 
     //on click hides login form and adds createaccount form
@@ -183,23 +218,35 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         loginForm.classList.remove("form--hidden");
         createAccountForm.classList.add("form--hidden");
+        forgotPasswordForm.classList.add("form--hidden");
       });
+
+    document.querySelector("#linkForgotPassword").addEventListener("click", e => {
+        e.preventDefault();
+        loginForm.classList.add("form--hidden");
+        createAccountForm.classList.add("form--hidden");
+        forgotPasswordForm.classList.remove("form--hidden");
+    })
     
     document.getElementById("submitData").addEventListener('click', e => {
         e.preventDefault();
     });
 
-    document.getElementById("insertData").addEventListener('clikc', e => {
+    document.getElementById("insertData").addEventListener('click', e => {
         e.preventDefault();
     });
 
+    document.getElementById("newPassword").addEventListener('click', e => {
+        e.preventDefault();
+    })
       //used to set message apon error. (need to push to new form if sucess)
       loginForm.addEventListener("submit", e => {
         e.preventDefault();
 
-        // Perform fetch Login
+        // Perform fetch Login - I guess not needed?
 
-        setFormMessage(loginForm, "error", "Invalid Username/password combination");
+
+        //setFormMessage(loginForm, "error", "Invalid Username/password combination");
       });
     });
 
@@ -326,6 +373,34 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert(errorMessage);
             });
     });
+
+    newPassword.addEventListener('click', async e => {
+    e.preventDefault(); // Prevent the default form submission behavior
+    forgotPasswordTitle.parentElement.querySelector(".form__message--error").textContent = "";
+
+    var email = document.getElementById('forgotEmail').value;
+    var userName = document.getElementById('forgotUserName').value;
+
+    try {
+        const userExists = await checkEmailUser(email, userName);
+
+        if (!userExists) {
+            forgotPasswordTitle.parentElement.querySelector(".form__message--error").textContent = "The Email and User Name do not match match any registered users";
+            return;
+        }
+
+        sendPasswordResetEmail(auth, email)
+            .then(() => {
+                alert('Password reset email sent successfully!');
+            })
+            .catch(error => {
+                alert('Error sending password reset email: ' + error.message);
+            });
+    } catch (error) {
+        console.error('Error checking user:', error);
+        alert('An error occurred while checking the user.');
+    }
+});
 
 /* signout method
 signOut(auth).then()) => {
