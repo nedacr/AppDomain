@@ -81,333 +81,336 @@
             <button class="form__button" id="newPassword">Send New Passowrd</button>
         </form>
     </div>
-    <script src="./src/main.js"></script>
-</body>
+    <script type="module">
 
-
-<script type="module">
-
+        //comment
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+        import { getDatabase, set, ref, update, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+        
     
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-    import { getDatabase, set, ref, update, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-
-
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
-  
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjKjeEiIpaLybLGQzoPlnGp1D6XYuh8Lw",
-      authDomain: "swe4713temp.firebaseapp.com",
-      databaseURL: "https://swe4713temp-default-rtdb.firebaseio.com",
-      projectId: "swe4713temp",
-      storageBucket: "swe4713temp.appspot.com",
-      messagingSenderId: "1067050664646",
-      appId: "1:1067050664646:web:c07f85156618fcbb59cdc7",
-      measurementId: "G-7L55RX7DM3"
-    };
-
-    async function checkEmailUser(email, userName) {
-        const usersRef = ref(database, 'users');
-        const usersSnapshot = await get(usersRef);
-
-        if (usersSnapshot.exists()) {
-            const users = usersSnapshot.val();
-
-        for (const userId in users) {
-            const user = users[userId];
-            if (user.email === email && user.username === userName) {
-                return true;
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyCjKjeEiIpaLybLGQzoPlnGp1D6XYuh8Lw",
+          authDomain: "swe4713temp.firebaseapp.com",
+          databaseURL: "https://swe4713temp-default-rtdb.firebaseio.com",
+          projectId: "swe4713temp",
+          storageBucket: "swe4713temp.appspot.com",
+          messagingSenderId: "1067050664646",
+          appId: "1:1067050664646:web:c07f85156618fcbb59cdc7",
+          measurementId: "G-7L55RX7DM3"
+        };
+    
+        async function checkEmailUser(email, userName) {
+            const usersRef = ref(database, 'users');
+            const usersSnapshot = await get(usersRef);
+    
+            if (usersSnapshot.exists()) {
+                const users = usersSnapshot.val();
+    
+                for (const userId in users) {
+                    const user = users[userId];
+                    if (user.email === email && user.username === userName) {
+                        return true;
+                    }
+                }
             }
+    
+            return false;
         }
-    }
-
-    return false;
-}
-
-
-  
-    function rearrangeDate(originalDate) {
-        // Split the original date into an array of parts: [YYYY, MM, DD]
-        const dateParts = originalDate.split('-');
-  
-        // Extract the month and year
-        const year = dateParts[0].substring(2);  // Take the last two digits of the year
-        const month = dateParts[1];
-  
-        // Concatenate and return the rearranged date (MMYY format)
-        const rearrangedDate = `${month}${year}`;
-        return rearrangedDate;
-  }
-
-    function makeUsername(firstName, lastName, dateOfBirth){
-        const firstChar = firstName[0];
-        const newUserName = firstChar + lastName + dateOfBirth;
-        return newUserName;
-    }
-
-    function hasNumber(input) {
-        return /\d/.test(input);
-    }
-
-    function hasSpecialChar(input) {
-        const specialChars = /[!@#$%^&*(),.?":{}|<>]/;
-
-        return specialChars.test(input);
-    }
-
-    function hasLetter(input) {
-        const letter = /[a-zA-Z]/;
-
-        return letter.test(input);
-    }
-
-    function hasValue(input) {
-        return hasNumber(input) && hasLetter(input) && hasSpecialChar(input);
-    }
-
-    function setInputError(inputElement, message){
-        inputElement.classList.add("form__input--error");
-        inputElement.parentElement.querySelector(".form__input--error-message").textContent = message;
-    } 
-
-    function clearInputError(inputElement) {
-        inputElement.classList.remove("form__input--error");
-        inputElement.parentElement.querySelector(".form__input--error-message").textContent = "";
-    }
-
-    //takes in element form, the tpye of form (in this case we only have Sucess and Error for all of index), and the message which should be sent. (in case of username and password. Type stays error but message changes to indicate the error)
-    function setFormMessage(formElement, type, message) {
-        const messageElement = formElement.querySelector(".form__message");
-
-        messageElement.textContent = message;
-        messageElement.classList.remove("form__message--success", "form__message--error");
-        messageElement.classList.add(`form__message--${type}`);
-}
-
-
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const database = getDatabase(app);
-
-    const auth = getAuth(app);
-
-
-    //waits for page to be loaded beofre creating values
-document.addEventListener("DOMContentLoaded", () => {
-    const loginForm = document.querySelector("#login");
-    const createAccountForm = document.querySelector("#createAccount");
-    const forgotPasswordForm = document.querySelector("#forgotPassword")
-
-    //on click hides createaccount form and adds loginform
-    document.querySelector("#linkCreateAccount").addEventListener("click", e => {
-        e.preventDefault();
-        loginForm.classList.add("form--hidden");
-        createAccountForm.classList.remove("form--hidden");
-        forgotPasswordForm.classList.add("form--hidden");
-    });
-
-    //on click hides login form and adds createaccount form
-    document.querySelector("#linkLogin").addEventListener("click", e => {
-        e.preventDefault();
-        loginForm.classList.remove("form--hidden");
-        createAccountForm.classList.add("form--hidden");
-        forgotPasswordForm.classList.add("form--hidden");
-      });
-
-    document.querySelector("#linkForgotPassword").addEventListener("click", e => {
-        e.preventDefault();
-        loginForm.classList.add("form--hidden");
-        createAccountForm.classList.add("form--hidden");
-        forgotPasswordForm.classList.remove("form--hidden");
-    })
     
-    document.getElementById("submitData").addEventListener('click', e => {
-        e.preventDefault();
-    });
-
-    document.getElementById("insertData").addEventListener('click', e => {
-        e.preventDefault();
-    });
-
-    document.getElementById("newPassword").addEventListener('click', e => {
-        e.preventDefault();
-    })
-      //used to set message apon error. (need to push to new form if sucess)
-      loginForm.addEventListener("submit", e => {
-        e.preventDefault();
-
-        // Perform fetch Login - I guess not needed?
-
-
-        //setFormMessage(loginForm, "error", "Invalid Username/password combination");
-      });
-    });
-
-
-    document.querySelectorAll(".form__input").forEach(inputElement => {
-        inputElement.addEventListener("blur", e => {
-            if (e.target.id === "realPassword" && e.target.value.length > 0 && e.target.value.length < 8) {
-                setInputError(inputElement, "Password must be at least 8 characters in length");
-            } else if (e.target.id === "realPassword" && hasValue(e.target.value) === false) {
-                setInputError(inputElement, "Password must contain at least one number, one letter, and one special character");
-            }
-        });
-        
-        inputElement.addEventListener("input", e => {
-            clearInputError(inputElement);
-        });
-    });
-
-
-
-    submitData.addEventListener('click', (e) => {
-        
-
-        var email = document.getElementById('realEmail').value;
-        var password = document.getElementById('realPassword').value;
-        var passwordConfirm = document.getElementById('confirmPassword').value;
-        var firstName = document.getElementById('firstName').value;
-        var lastName = document.getElementById('lastName').value;
-        var date = document.getElementById('dateOfBirth').value;
-        var address = document.getElementById('address').value;
-        var reDate = rearrangeDate(date);
-        var userName = makeUsername(firstName, lastName, reDate);
-
-        if (!email || !password || !firstName || !lastName || !date || !address || password !== passwordConfirm) {
-            
-            if(!email){
-                setInputError(document.getElementById('realEmail'), 'please enter your Email');
-            }
-            if(!password) {
-                setInputError(document.getElementById('realPassword'), 'please enter your password');
-            }else if (password !== passwordConfirm) {
-                setInputError(document.getElementById('confirmPassword'), 'Passwords do not match!');
-            }
-            if(!firstName){
-                setInputError(document.getElementById('firstName'), 'please enter your First Name');
-            }
-            if(!lastName){
-                setInputError(document.getElementById('lastName'), 'please enter your Last Name');
-            }
-            if(!date){
-                setInputError(document.getElementById('dateOfBirth'), 'please enter your Birth Date');
-            }
-            if(!address){
-                setInputError(document.getElementById('address'), 'please enter your address');
-            }
-                
-           
-            return; // Stop further execution
+    
+      
+        function rearrangeDate(originalDate) {
+            // Split the original date into an array of parts: [YYYY, MM, DD]
+            const dateParts = originalDate.split('-');
+      
+            // Extract the month and year
+            const year = dateParts[0].substring(2);  // Take the last two digits of the year
+            const month = dateParts[1];
+      
+            // Concatenate and return the rearranged date (MMYY format)
+            const rearrangedDate = `${month}${year}`;
+            return rearrangedDate;
+      }
+    
+        function makeUsername(firstName, lastName, dateOfBirth){
+            const firstChar = firstName[0];
+            const newUserName = firstChar + lastName + dateOfBirth;
+            return newUserName;
+        }
+    
+        function hasNumber(input) {
+            return /\d/.test(input);
+        }
+    
+        function hasSpecialChar(input) {
+            const specialChars = /[!@#$%^&*(),.?":{}|<>]/;
+    
+            return specialChars.test(input);
+        }
+    
+        function hasLetter(input) {
+            const letter = /[a-zA-Z]/;
+    
+            return letter.test(input);
+        }
+    
+        function hasValue(input) {
+            return hasNumber(input) && hasLetter(input) && hasSpecialChar(input);
+        }
+    
+        function setInputError(inputElement, message){
+            inputElement.classList.add("form__input--error");
+            inputElement.parentElement.querySelector(".form__input--error-message").textContent = message;
         } 
-            
-
-
-        createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-             // Signed in 
-            const user = userCredential.user;
-            // ...
-            set(ref(database, 'users/' + user.uid), {
-                username: userName,
-                email: email,
-                password: password,
-                firstName: firstName,
-                lastName: lastName,
-                dateOfBirth: date,
-                address: address
-            })
-                .then(() => {
-                  // Data saved successfully!
-                  alert('user created successfully')
-                })
-                .catch((error) => {
-                // The write failed...
-                  alert(error);
-                });
-            
+    
+        function clearInputError(inputElement) {
+            inputElement.classList.remove("form__input--error");
+            inputElement.parentElement.querySelector(".form__input--error-message").textContent = "";
+        }
+    
+        //takes in element form, the tpye of form (in this case we only have Sucess and Error for all of index), and the message which should be sent. (in case of username and password. Type stays error but message changes to indicate the error)
+        function setFormMessage(formElement, type, message) {
+            const messageElement = formElement.querySelector(".form__message");
+    
+            messageElement.textContent = message;
+            messageElement.classList.remove("form__message--success", "form__message--error");
+            messageElement.classList.add(`form__message--${type}`);
+    }
+    
+    
+    
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+    
+        const auth = getAuth(app);
+    
+    
+        //waits for page to be loaded beofre creating values
+    document.addEventListener("DOMContentLoaded", () => {
+        const loginForm = document.querySelector("#login");
+        const createAccountForm = document.querySelector("#createAccount");
+        const forgotPasswordForm = document.querySelector("#forgotPassword")
+    
+        //on click hides createaccount form and adds loginform
+        document.querySelector("#linkCreateAccount").addEventListener("click", e => {
+            e.preventDefault();
+            loginForm.classList.add("form--hidden");
+            createAccountForm.classList.remove("form--hidden");
+            forgotPasswordForm.classList.add("form--hidden");
+        });
+    
+        //on click hides login form and adds createaccount form
+        document.querySelector("#linkLogin").addEventListener("click", e => {
+            e.preventDefault();
+            loginForm.classList.remove("form--hidden");
+            createAccountForm.classList.add("form--hidden");
+            forgotPasswordForm.classList.add("form--hidden");
+          });
+    
+        document.querySelector("#linkForgotPassword").addEventListener("click", e => {
+            e.preventDefault();
+            loginForm.classList.add("form--hidden");
+            createAccountForm.classList.add("form--hidden");
+            forgotPasswordForm.classList.remove("form--hidden");
         })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            // ..
-            alert(error.message)
-        }); 
-
         
-    }); 
-
-    insertData.addEventListener('click', e => {
-        var email = document.getElementById('loginEmail').value;
-        var password = document.getElementById('loginPassword').value;
-
-        signInWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-            // Signed in 
-                const user = userCredential.user;
-            // ...
+        document.getElementById("submitData").addEventListener('click', e => {
+            e.preventDefault();
+        });
+    
+        document.getElementById("insertData").addEventListener('click', e => {
+            e.preventDefault();
+        });
+    
+        document.getElementById("newPassword").addEventListener('click', e => {
+            e.preventDefault();
+        })
+          //used to set message apon error. (need to push to new form if sucess)
+          loginForm.addEventListener("submit", e => {
+            e.preventDefault();
+    
+            // Perform fetch Login - I guess not needed?
+    
+    
+            //setFormMessage(loginForm, "error", "Invalid Username/password combination");
+          });
+        });
+    
+    
+        document.querySelectorAll(".form__input").forEach(inputElement => {
+            inputElement.addEventListener("blur", e => {
+                if (e.target.id === "realPassword" && e.target.value.length > 0 && e.target.value.length < 8) {
+                    setInputError(inputElement, "Password must be at least 8 characters in length");
+                } else if (e.target.id === "realPassword" && hasValue(e.target.value) === false) {
+                    setInputError(inputElement, "Password must contain at least one number, one letter, and one special character");
+                }
+            });
             
-            var lgDate = new Date();
-            update(ref(database, 'users/' + user.uid), {
-                last_login: lgDate,
-            })
-                .then(() => {
-                  // Data saved successfully!
-                  alert('user logged in successfully')
+            inputElement.addEventListener("input", e => {
+                clearInputError(inputElement);
+            });
+        });
+    
+    
+    
+        submitData.addEventListener('click', (e) => {
+            
+    
+            var email = document.getElementById('realEmail').value;
+            var password = document.getElementById('realPassword').value;
+            var passwordConfirm = document.getElementById('confirmPassword').value;
+            var firstName = document.getElementById('firstName').value;
+            var lastName = document.getElementById('lastName').value;
+            var date = document.getElementById('dateOfBirth').value;
+            var address = document.getElementById('address').value;
+            var reDate = rearrangeDate(date);
+            var userName = makeUsername(firstName, lastName, reDate);
+    
+            if (!email || !password || !firstName || !lastName || !date || !address || password !== passwordConfirm) {
+                
+                if(!email){
+                    setInputError(document.getElementById('realEmail'), 'please enter your Email');
+                }
+                if(!password) {
+                    setInputError(document.getElementById('realPassword'), 'please enter your password');
+                }else if (password !== passwordConfirm) {
+                    setInputError(document.getElementById('confirmPassword'), 'Passwords do not match!');
+                }
+                if(!firstName){
+                    setInputError(document.getElementById('firstName'), 'please enter your First Name');
+                }
+                if(!lastName){
+                    setInputError(document.getElementById('lastName'), 'please enter your Last Name');
+                }
+                if(!date){
+                    setInputError(document.getElementById('dateOfBirth'), 'please enter your Birth Date');
+                }
+                if(!address){
+                    setInputError(document.getElementById('address'), 'please enter your address');
+                }
+                    
+               
+                return; // Stop further execution
+            } 
+                
+    
+    
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                 // Signed in 
+                const user = userCredential.user;
+                // ...
+                set(ref(database, 'users/' + user.uid), {
+                    username: userName,
+                    email: email,
+                    password: password,
+                    firstName: firstName,
+                    lastName: lastName,
+                    dateOfBirth: date,
+                    address: address
                 })
-                .catch((error) => {
-                // The write failed...
-                  alert(error);
-                });
-
+                    .then(() => {
+                      // Data saved successfully!
+                      alert('user created successfully')
+                    })
+                    .catch((error) => {
+                    // The write failed...
+                      alert(error);
+                    });
+                
             })
             .catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;
-                alert(errorMessage);
-            });
-    });
-
-    newPassword.addEventListener('click', async e => {
-    e.preventDefault(); // Prevent the default form submission behavior
-    forgotPasswordTitle.parentElement.querySelector(".form__message--error").textContent = "";
-
-    var email = document.getElementById('forgotEmail').value;
-    var userName = document.getElementById('forgotUserName').value;
-
-    try {
-        const userExists = await checkEmailUser(email, userName);
-
-        if (!userExists) {
-            forgotPasswordTitle.parentElement.querySelector(".form__message--error").textContent = "The Email and User Name do not match match any registered users";
-            return;
+                // ..
+                alert(error.message)
+            }); 
+    
+            
+        }); 
+    
+        insertData.addEventListener('click', e => {
+            var email = document.getElementById('loginEmail').value;
+            var password = document.getElementById('loginPassword').value;
+    
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                // Signed in 
+                    const user = userCredential.user;
+                // ...
+                
+                var lgDate = new Date();
+                update(ref(database, 'users/' + user.uid), {
+                    last_login: lgDate,
+                })
+                    .then(() => {
+                      // Data saved successfully!
+                      alert('user logged in successfully')
+                    })
+                    .catch((error) => {
+                    // The write failed...
+                      alert(error);
+                    });
+    
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    alert(errorMessage);
+                });
+        });
+    
+        newPassword.addEventListener('click', async e => {
+        e.preventDefault(); // Prevent the default form submission behavior
+        forgotPasswordTitle.parentElement.querySelector(".form__message--error").textContent = "";
+    
+    
+    
+        var email = document.getElementById('forgotEmail').value;
+        var userName = document.getElementById('forgotUserName').value;
+    
+        try {
+            const userExists = await checkEmailUser(email, userName);
+    
+            if (!userExists) {
+                forgotPasswordTitle.parentElement.querySelector(".form__message--error").textContent = "The Email and User Name do not match match any registered users";
+                return;
+            }
+    
+            sendPasswordResetEmail(auth, email)
+                .then(() => {
+                    alert('Password reset email sent successfully!');
+                })
+                .catch(error => {
+                    alert('Error sending password reset email: ' + error.message);
+                });
+        } catch (error) {
+            console.error('Error checking user:', error);
+            alert('An error occurred while checking the user.');
         }
+    });
+    
+    /* signout method
+    signOut(auth).then()) => {
+        // singout successful.
+    }).catch((error) => {
+        //an error happened.
+    }); */
+      </script>
+    
+    <script src="./src/main.js"></script>
+</body>
 
-        sendPasswordResetEmail(auth, email)
-            .then(() => {
-                alert('Password reset email sent successfully!');
-            })
-            .catch(error => {
-                alert('Error sending password reset email: ' + error.message);
-            });
-    } catch (error) {
-        console.error('Error checking user:', error);
-        alert('An error occurred while checking the user.');
-    }
-});
 
-/* signout method
-signOut(auth).then()) => {
-    // singout successful.
-}).catch((error) => {
-    //an error happened.
-}); */
-  </script>
 
   
