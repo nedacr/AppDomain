@@ -1,0 +1,34 @@
+body {
+    --color-primary: #151e3f;
+    --color-primary-dark: #030027;
+    --color-secondary: #cc6f12;
+    --color-error: #cc3333;
+    --color-success: #4bb544;
+    --border-radius: 4px;
+
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    
+    font-size: 18px;
+    background: var(--color-primary);
+    background-size: cover;
+}
+
+.banner {
+    background-color: var(--color-secondary);
+    color: #fff;
+    text-align: right;
+    width: 100%;
+    position: fixed;
+    top: 0;
+  }
+
+  .container {
+    padding: 20px;
+    margin:  -410px 0px 0px; /* Adjust the margin to create space between banner and container */
+    border: 1px solid #ccc;
+    background-color: var(--color-primary);
+    color: #fff;
+  }

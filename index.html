@@ -317,7 +317,8 @@
                     firstName: firstName,
                     lastName: lastName,
                     dateOfBirth: date,
-                    address: address
+                    address: address,
+                    cred: 0
                 })
                     .then(() => {
                       // Data saved successfully!
@@ -373,6 +374,7 @@
                     .then(() => {
                       // Data saved successfully!
                       alert('user logged in successfully')
+                      window.location.href = './src/user_page.html?data=' + user.uid, '_blank';
                     })
                     .catch((error) => {
                     // The write failed...
