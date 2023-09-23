@@ -81,6 +81,12 @@
             <button class="form__button" id="newPassword">Send New Passowrd</button>
         </form>
     </div>
+    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="text/javascript">
+      (function () {
+        emailjs.init("Do1B22pVrG5JOMZyR"); // Replace with your EmailJS user ID
+      })();
+    </script>
     <script type="module">
 
         //comment
@@ -106,7 +112,7 @@
           appId: "1:1067050664646:web:c07f85156618fcbb59cdc7",
           measurementId: "G-7L55RX7DM3"
         };
-    
+        
         async function checkEmailUser(email, userName) {
             const usersRef = ref(database, 'users');
             const usersSnapshot = await get(usersRef);
@@ -318,11 +324,27 @@
                     lastName: lastName,
                     dateOfBirth: date,
                     address: address,
-                    cred: 0
+                    cred: 0,
+                    id: user.uid,
+                    active: false
                 })
                     .then(() => {
                       // Data saved successfully!
                       alert('user created successfully')
+                      const emailParams = {
+                        to_email: 'gamerglitches101@gmail.com',  // Replace with the recipient's email address
+                        subject: 'User Activation Required',  // Replace with the desired subject
+                        message: 'New User Creation. Account is Deactived till you Activate it'   // Replace with the desired email content
+                    };
+
+                    // Send the email using EmailJS
+                    emailjs.send('service_uhjncdn', 'template_57xcxk7', emailParams)
+                    .then((response) => {
+                        alert('Email sent successfully!', response);
+                    })
+                    .catch((error) => {
+                        alert('Error sending email:', error);
+                    });
                     })
                     .catch((error) => {
                     // The write failed...
@@ -362,19 +384,34 @@
     
             signInWithEmailAndPassword(auth, email, password)
                 
-                .then((userCredential) => {
+                .then(async (userCredential) => {
                 // Signed in 
                     const user = userCredential.user;
-                // ...
+                
+                    const userRef = ref(database, 'users/' + user.uid);
+                    const userSnapshot = await get(userRef);
+                    const userCred = userSnapshot.val().cred;
+                    const userActive = userSnapshot.val().active;
                 
                 var lgDate = new Date();
                 update(ref(database, 'users/' + user.uid), {
                     last_login: lgDate,
                 })
                     .then(() => {
-                      // Data saved successfully!
+                      if(!userActive){
+                        alert('User account is Deactivated');
+                        return;
+                      }
                       alert('user logged in successfully')
-                      window.location.href = './src/user_page.html?data=' + user.uid, '_blank';
+                      if (userCred === 0){
+                        window.location.href = './src/user_page.html?data=' + user.uid, '_blank';
+                      } else if (userCred === 1) {
+                        window.location.href = './src/manager_page.html?data=' + user.uid, '_blank';
+                      } else if (userCred === 2) {
+                        window.location.href = './src/admin_page.html?data=' + user.uid, '_blank';
+                      } else{
+                        alert('no cred defined');
+                      }                  
                     })
                     .catch((error) => {
                     // The write failed...
