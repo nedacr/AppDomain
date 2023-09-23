@@ -79,6 +79,12 @@
                 <div class="form__input--error-message"></div>
             </div>
             <button class="form__button" id="newPassword">Send New Passowrd</button>
+            <p class="form__text">
+                <a href="#" class="form__link"></a>
+            </p>
+            <p class="form__text">
+                <a class="form__link" id="linkReturnPassword">Return</a>
+            </p>
         </form>
     </div>
     <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
@@ -228,7 +234,14 @@
             loginForm.classList.add("form--hidden");
             createAccountForm.classList.add("form--hidden");
             forgotPasswordForm.classList.remove("form--hidden");
-        })
+        });
+
+        document.querySelector("#linkReturnPassword").addEventListener("click", e => {
+            e.preventDefault();
+            loginForm.classList.remove("form--hidden");
+            createAccountForm.classList.add("form--hidden");
+            forgotPasswordForm.classList.add("form--hidden");
+          });
         
         document.getElementById("submitData").addEventListener('click', e => {
             e.preventDefault();
