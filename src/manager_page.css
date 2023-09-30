@@ -55,3 +55,54 @@ body {
   z-index: 1000;
   
 }
+
+.actionButton {
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.actionButton:hover {
+  background-color: #cc3333;
+}
+
+.table_responsive{
+  width: 1200px;
+  max-width: 2000px;
+  border: 1px solid var(--color-secondary);
+  background-color: #fff;
+  padding: 15px;
+  overflow-y: auto;
+  margin: auto;
+  border-radius: 4px;
+  margin: 100px auto 1rem;
+  height: calc(100vh - 100px);
+  
+}
+
+table{
+  width: 100%;
+  font-size: 13px;
+  color: var(--color-primary-dark);
+  white-space: nowrap;
+  border-collapse: collapse;
+}
+
+table>thead{
+  background-color: var(--color-secondary);
+  color: #fff;
+}
+
+table>thead th{
+  padding: 15px;
+
+}
+
+table th,
+table td{
+  border: 1px solid #00000017;
+  text-align: center;
+}
+
