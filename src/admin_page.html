@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="utf-8">
@@ -15,13 +15,30 @@
   </div>
   
   <div class="container">
-    <form class="form " id="mainPage">
+    <form class="form form--hidden" id="mainPage">
     <h2>Main Content</h2>
     <p>This is the main content of your webpage contained within a container.</p>
     <p>Content Goes Here</p>
     <ul id="userList"></ul>
     <button class="form__button" id="createUser" type="submit">Create New User</button>
-    
+  </form>
+  <form class="form" id="tableForm">
+    <table>
+      <thead>
+        <tr>
+          <th>SL</th>
+          <th>UserName</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Cred</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody id="userTableBody"></tbody>
+    </table>
+    <button class="form__button" id="createUsers" type="submit">Create New User</button>
   </form>
   <form class="form form--hidden" id="createNewAccount">
     <h1 class="form__title">Create New Account</h1>
@@ -123,7 +140,15 @@
       emailjs.init("Do1B22pVrG5JOMZyR"); // Replace with your EmailJS user ID
     })();
   </script>
+  
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+
+
   <script type="module">
+
+   
+
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getDatabase, set, ref, update, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
@@ -144,6 +169,8 @@
     const database = getDatabase();
 
     const auth = getAuth(app);
+
+    
     
     //when selected user gets stored to update for later
     let selectedUserId = null;
@@ -151,15 +178,16 @@
     document.addEventListener("DOMContentLoaded", () => {
         const mainForm = document.querySelector("#mainPage");
         const createNewAccountForm = document.querySelector("#createNewAccount");
-        const updateAccountForm = document.querySelector("#updateAccount")
-        const emailForm = document.querySelector("#email")
+        const updateAccountForm = document.querySelector("#updateAccount");
+        const emailForm = document.querySelector("#email");
+        const tableForm = document.querySelector("#tableForm");
 
     
         //on click hides hides create new account and unhides mainpage
         document.querySelector("#linkReturn").addEventListener("click", e => {
             e.preventDefault();
             createNewAccountForm.classList.add("form--hidden");
-            mainForm.classList.remove("form--hidden");
+            tableForm.classList.remove("form--hidden");
             updateAccountForm.add("form--hidden");
         });
 
@@ -169,10 +197,17 @@
             mainForm.classList.add("form--hidden");
         });
 
+        document.querySelector("#createUsers").addEventListener("click", e => {
+            e.preventDefault();
+            createNewAccountForm.classList.remove("form--hidden");
+            mainForm.classList.add("form--hidden");
+            tableForm.classList.add("form--hidden");
+        });
+
         document.getElementById("linkReturnUpdate").addEventListener("click", e => {
             e.preventDefault();
             updateAccountForm.classList.add("form--hidden");
-            mainForm.classList.remove("form--hidden");
+            tableForm.classList.remove("form--hidden");
         });
 
         document.getElementById("emailUser").addEventListener("click", e => {
@@ -228,6 +263,9 @@
             document.getElementById('updateauthentication').value = user.cred;
           }
         }
+
+        
+
 
 
         function rearrangeDate(originalDate) {
@@ -679,7 +717,96 @@
     });
 });
 
-    displayUserData(); // Call the function after defining it
+function performAction(userId, action) {
+
+  if (action === 'edit') {
+    const userRef = ref(database, `users/${userId}`);
+    get(userRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          updateFormWithData(userData);
+          selectedUserId = userId;
+          const mainForm = document.querySelector("#mainPage");
+          const createNewAccountForm = document.querySelector("#createNewAccount");
+          const updateAccountForm = document.querySelector("#updateAccount");
+          const userForm = document.querySelector('#tableForm');
+          mainForm.classList.add("form--hidden");
+          createNewAccountForm.classList.add("form--hidden");
+          updateAccountForm.classList.remove("form--hidden");
+          userForm.classList.add("form--hidden");
+        } else {
+          alert('User not found.');
+        }
+      })
+      .catch((error) => {
+        alert('Error fetching user data: ' + error.message);
+      });
+  } else if (action === 'delete') {
+    alert('Delete action triggered for user ID: ' + userId);
+    // Implement delete action here
+  } else if (action === 'view') {
+    alert('View action triggered for user ID: ' + userId);
+    // Implement view action here
+  }
+}
+
+async function displayAllUsers() {
+  const usersRef = ref(database, 'users');
+  const usersSnapshot = await get(usersRef);
+  
+  if (usersSnapshot.exists()) {
+    const usersData = usersSnapshot.val();
+
+    const userTableBody = document.getElementById('userTableBody');
+    userTableBody.innerHTML = '';  // Clear previous data in the table
+
+    let index = 1;
+    for (const userId in usersData) {
+      const userData = usersData[userId];
+      const { username, firstName, lastName, email, cred, active } = userData;
+
+      const tableRow = document.createElement('tr');
+      tableRow.innerHTML = `
+        <td>${index}</td>
+        <td>${username}</td>
+        <td>${firstName} ${lastName}</td>
+        <td>${email}</td>
+        <td>${active ? 'Active' : 'Inactive'}</td>
+        <td>${cred}</td>
+        <td>
+          <button class="actionButton" type="button" data-userid="${userId}" data-action="edit">Edit</button>
+          <button class="actionButton" type="button" data-userid="${userId}" data-action="delete">Delete</button>
+          <button class="actionButton" type="button" data-userid="${userId}" data-action="view">View</button>
+        </td>
+      `;
+
+      userTableBody.appendChild(tableRow);
+      index++;
+    }
+    const actionButtons = document.querySelectorAll('.actionButton');
+  actionButtons.forEach(button => {
+    button.addEventListener('click', (event) => {
+      
+      const userId = event.target.getAttribute('data-userid');
+      const action = event.target.getAttribute('data-action');
+      performAction(userId, action);
+    });
+  });
+  } else {
+    // Handle case where there are no users
+    const userTableBody = document.getElementById('userTableBody');
+    userTableBody.innerHTML = '<tr><td colspan="6">No users found.</td></tr>';
+  }
+}
+
+
+
+
+
+displayAllUsers();
+
+displayUserData(); // Call the function after defining it
 
   </script>
 </body>
