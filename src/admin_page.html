@@ -11,7 +11,11 @@
   <img id="userImage" alt="User Image" src="newuser.png" class="userPicture">
   <div class="banner">
     <h1 id="dataDisplay"></h1>
-    
+    <button class="banner-button" id="dashboardButton" type="submit">Dashboard</button>
+    <button class="banner-button" id="userButton" type="submit">Users</button>
+    <button class="banner-button" id="accountsButton" type="submit">Accounts</button>
+    <button class="banner-button" type="submit">Button 3</button>
+    <button class="banner-button" type="submit">Button 4</button>
   </div>
   
   <div class="container">
@@ -19,10 +23,9 @@
     <h2>Main Content</h2>
     <p>This is the main content of your webpage contained within a container.</p>
     <p>Content Goes Here</p>
-    <ul id="userList"></ul>
-    <button class="form__button" id="createUser" type="submit">Create New User</button>
+    
   </form>
-  <form class="form" id="tableForm">
+  <form class="form form--hidden" id="tableForm">
     <table>
       <thead>
         <tr>
@@ -40,6 +43,78 @@
     </table>
     <button class="form__button" id="createUsers" type="submit">Create New User</button>
   </form>
+
+  <form class="form" id="accountTableForm">
+    <table>
+      <thead>
+        <tr>
+          <th>Account Number</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Sub-Category</th>
+          <th>Balance</th>
+          <th>Date Added</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="accountTableBody"></tbody>
+    </table>
+
+    <button class="form__button" id="createNewAccountbutton" type="submit">Create New Account</button>
+  </form>
+
+  <form class="form form--hidden" id="createNewAccountForm">
+    <h1 class="form__title">Create New Account</h1>
+    <div class="form__message form__message--error"></div>
+    <div class="form__input-group">
+      <input type="text" id="accountName" class="form__input" autofocus placeholder="Account Name">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="category" class="form__input" autofocus placeholder="Category">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="subCategory" class="form__input" autofocus placeholder="Sub-Category">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="normalSide" class="form__input" autofocus placeholder="Normal Side">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="initialBalance" class="form__input" autofocus placeholder="Initial Balance">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="debit" class="form__input" autofocus placeholder="Debit">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="credit" class="form__input" autofocus placeholder="Credit">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="order" class="form__input" autofocus placeholder="Order">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="statement" class="form__input" autofocus placeholder="Statement">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="comment" class="form__input" autofocus placeholder="Comment">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="description" class="form__input" autofocus placeholder="Description">
+      <div class="form__input--error-message"></div>
+    </div>
+    
+    <button class="form__button" id="CreateAccountsButton">Create Account</button>
+  </form>
+
   <form class="form form--hidden" id="createNewAccount">
     <h1 class="form__title">Create New Account</h1>
       <div class="form__message form__message--error"></div>
@@ -181,6 +256,8 @@
         const updateAccountForm = document.querySelector("#updateAccount");
         const emailForm = document.querySelector("#email");
         const tableForm = document.querySelector("#tableForm");
+        const accountTableForm = document.querySelector("#accountTableForm");
+        const createNewAccountsForm = document.querySelector("#createNewAccountForm")
 
     
         //on click hides hides create new account and unhides mainpage
@@ -191,10 +268,38 @@
             updateAccountForm.add("form--hidden");
         });
 
-        document.querySelector("#createUser").addEventListener("click", e => {
+        document.querySelector("#userButton").addEventListener("click", e => {
+          e.preventDefault();
+          mainForm.classList.add("form--hidden");
+          tableForm.classList.remove("form--hidden");
+          accountTableForm.classList.add("form--hidden");
+        });
+
+        document.querySelector("#dashboardButton").addEventListener("click", e => {
+          e.preventDefault();
+          mainForm.classList.remove("form--hidden");
+          tableForm.classList.add("form--hidden");
+          createNewAccountForm.classList.add("form--hidden");
+          updateAccountForm.classList.add("form--hidden");
+          emailForm.classList.add("form--hidden");
+          accountTableForm.classList.add("form--hidden");
+        });
+
+        document.querySelector("#accountsButton").addEventListener("click", e => {
+          e.preventDefault();
+          mainForm.classList.add("form--hidden");
+          tableForm.classList.add("form--hidden");
+          createNewAccountForm.classList.add("form--hidden");
+          updateAccountForm.classList.add("form--hidden");
+          emailForm.classList.add("form--hidden");
+          createNewAccountsForm.classList.add("form--hidden");
+          accountTableForm.classList.remove("form--hidden");
+        });
+
+        document.querySelector("#createNewAccountbutton").addEventListener("click", e => {
             e.preventDefault();
-            createNewAccountForm.classList.remove("form--hidden");
-            mainForm.classList.add("form--hidden");
+            createNewAccountsForm.classList.remove("form--hidden");
+            accountTableForm.classList.add("form--hidden");
         });
 
         document.querySelector("#createUsers").addEventListener("click", e => {
@@ -203,6 +308,7 @@
             mainForm.classList.add("form--hidden");
             tableForm.classList.add("form--hidden");
         });
+
 
         document.getElementById("linkReturnUpdate").addEventListener("click", e => {
             e.preventDefault();
@@ -218,6 +324,10 @@
 
         document.getElementById("submitData").addEventListener('click', e => {
             e.preventDefault();
+        });
+
+        document.querySelector('#CreateAccountsButton').addEventListener('click', (e) => {
+        e.preventDefault(); 
         });
 
         document.getElementById('updateData').addEventListener('click', (e) => {
@@ -400,6 +510,64 @@
       }
     }
 
+    function formatToTwoDecimalPlaces(num) {
+      return num.toFixed(2);
+    }
+
+    function formatMonetaryValue(value) {
+      // Ensure the value is a number
+      value = parseFloat(value);
+
+      // Check if the value is a valid number
+      if (isNaN(value)) {
+        return 'Invalid value';
+      }
+
+      // Format the monetary value with commas and two decimal places
+      return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    
+    async function findNextAvailableAccountNumber(category) {
+      const startAccountNumber = category === 'assets' ? 100 : 200;
+      const accountNumbers = await getAllAccountNumbers(category);
+
+      // Sort the account numbers
+      accountNumbers.sort((a, b) => a - b);
+
+      // Find the next available account number
+      for (let i = startAccountNumber; i < startAccountNumber + 100; i++) {
+        if (!accountNumbers.includes(i)) {
+          return i;
+        }
+      }
+
+      // No available account numbers
+      return -1;
+    }
+
+    //for some reason get function no work in while(true) loop,  next best option create list before check. 
+    //creats list of all account numebrs
+    async function getAllAccountNumbers(category) {
+      const accountNumbers = [];
+
+      const accountsRef = ref(database, 'accounts');
+      const snapshot = await get(accountsRef);
+      //loops to check in account aexits then checks account number. Pushes account number into list (tbh I looked up a guide, no idea how this works)
+      if (snapshot.exists()) {
+        const accountData = snapshot.val();
+        for (const accountKey in accountData) {
+          if (accountData.hasOwnProperty(accountKey)) {
+           const account = accountData[accountKey];
+           accountNumbers.push(account.accountNumber);
+          }
+        }
+      }
+
+      return accountNumbers;
+    }
+
+
     function getDataFromQuery() {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get('data');
@@ -410,6 +578,8 @@
         alert('No user selected.');
         return;
       }
+
+      
 
       // Fetch the user's email address based on the selectedUserId
       const userRef = ref(database, 'users/' + selectedUserId);
@@ -453,6 +623,113 @@
      });
     }
 
+    CreateAccountsButton.addEventListener('click', async (e) => {
+      var accountName = document.getElementById('accountName').value;
+      var category =document.getElementById('category').value;
+      var subCategory = document.getElementById('subCategory').value;
+      var normalSide = document.getElementById('normalSide').value;
+      var initialBalance = document.getElementById('initialBalance').value;
+      var debit = document.getElementById('debit').value;
+      var credit = document.getElementById('credit').value;
+      var order = document.getElementById('order').value;
+      var statement = document.getElementById('statement').value;
+      var comment = document.getElementById('comment').value;
+      var description = document.getElementById('description').value;
+      
+      getAllAccountNumbers().then(accountNumbers => {
+  console.log('List of account numbers:', accountNumbers);
+});
+      
+      //Check for correct values
+      if (!accountName || (!category || (category !== 'assets' && category !== 'liabilities')) || !subCategory || (!normalSide || (normalSide !== 'debit' && normalSide !== 'credit')) || !initialBalance || !debit || !credit || !order || !statement || !comment || !description){
+        if(!accountName){
+          setInputError(document.getElementById('accountName'), 'Please enter the Account Name');
+        }
+        if(!category){
+          setInputError(document.getElementById('category'), 'Please enter the Account Category');
+        }else if (category !== 'assets' && category !== 'liabilities'){
+          setInputError(document.getElementById('category'), 'The account category provided is not valid');
+        }
+        if(!subCategory){
+          setInputError(document.getElementById('subCategory'), 'Please enter the Account Sub-Catergory');
+        }
+        if(!normalSide){
+          setInputError(document.getElementById('normalSide'), 'Please enter the Account normal side');
+        }else if(normalSide !== 'credit' && normalSide !== 'debit'){
+          setInputError(document.getElementById('normalSide'), 'The account normal side provided is not valid');
+        }
+        if(!initialBalance){
+          setInputError(document.getElementById('initialBalance'), 'Please enter the Account Balance');
+        }
+        if(!credit){
+          setInputError(document.getElementById('credit'), 'Please enter the credit');
+        }
+        if(!debit){
+          setInputError(document.getElementById('debit'), 'Please enter the debit');
+        }
+        if(!order){
+          setInputError(document.getElementById('order'), 'Please enter the order');
+        }
+        if(!statement){
+          setInputError(document.getElementById('statement'), 'Please enter the statement');
+        }
+        if(!comment){
+          setInputError(document.getElementById('comment'), 'Please enter A comment');
+        }
+        if(!description){
+          setInputError(document.getElementById('description'), 'Please enter a description');
+        }
+        
+        return;
+      }
+
+      //Date Of creation
+      var currentDate = new Date();
+      var formattedDate = currentDate.toLocaleString();
+
+      //user who created account
+      var userCreation = getDataFromQuery();
+
+      //current balance = initial balance  at creation
+      var balance = initialBalance;
+      
+      //same account name
+      const accountRef = ref(database, 'accounts/' + accountName);
+      
+      const snapshot = await get(accountRef);
+
+      if (snapshot.exists()) {
+        setInputError(document.getElementById('accountName'), 'This account Name already exists, please enter a new one');
+        return;
+      }
+
+      
+      //accountNumber
+      const accountNumber = await findNextAvailableAccountNumber(category);
+      alert(accountNumber);
+      
+
+      set(ref(database, 'accounts/' + accountName), {
+        accountName: accountName,
+        category: category,
+        accountNumber: accountNumber,
+        subCategory: subCategory,
+        normalSide: normalSide,
+        initialBalance: initialBalance,
+        balance: balance,
+        debit: debit,
+        credit: credit,
+        order: order,
+        statement: statement,
+        comment: comment,
+        description: description,
+        date: formattedDate,
+        userId: userCreation
+      })
+
+      alert('account created');
+
+    });
 
     submitData.addEventListener('click', (e) => {
             
@@ -800,11 +1077,60 @@ async function displayAllUsers() {
   }
 }
 
+async function displayAllAccounts() {
+  const accountsRef = ref(database, 'accounts');
+  const accountsSnapshot = await get(accountsRef);
+  
+  if (accountsSnapshot.exists()) {
+    const accountsData = accountsSnapshot.val();
 
+    const accountTableBody = document.getElementById('accountTableBody');
+    accountTableBody.innerHTML = '';  // Clear previous data in the table
+
+    let index = 1;
+    for (const accountName in accountsData) {
+      const accountData = accountsData[accountName];
+      const { accountNumber, category, subCategory, balance, date} = accountData;
+
+      const tableRow = document.createElement('tr');
+      tableRow.innerHTML = `
+        <td>${accountNumber}</td>
+        <td>${accountName}</td>
+        <td>${category}</td>
+        <td>${subCategory}</td>
+        <td>${formatMonetaryValue(balance)}</td>
+        <td>${date}</td>
+        <td>
+          <button class="actionButton" type="button" data-userid="temp" data-action="edit">Edit</button>
+          <button class="actionButton" type="button" data-userid="temp" data-action="delete">Delete</button>
+          <button class="actionButton" type="button" data-userid="temp" data-action="view">View</button>
+        </td>
+      `;
+
+      accountTableBody.appendChild(tableRow);
+      index++;
+    }
+    /*const actionButtons = document.querySelectorAll('.actionButton');
+  actionButtons.forEach(button => {
+    button.addEventListener('click', (event) => {
+      
+      const userId = event.target.getAttribute('data-userid');
+      const action = event.target.getAttribute('data-action');
+      performAction(userId, action);
+    })
+  });*/
+  } else {
+    // Handle case where there are no users
+    const userTableBody = document.getElementById('userTableBody');
+    userTableBody.innerHTML = '<tr><td colspan="6">No users found.</td></tr>';
+  }
+}
 
 
 
 displayAllUsers();
+
+displayAllAccounts();
 
 displayUserData(); // Call the function after defining it
 
