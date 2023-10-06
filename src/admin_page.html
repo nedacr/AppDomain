@@ -72,6 +72,7 @@
   </form>
 
   <form class="form form--hidden" id="searchedAccountTable">
+    <h1 class="form__title">Event Log</h1>
     <table>
       <thead>
         <tr>
@@ -86,6 +87,22 @@
       </thead>
 
       <tbody id="searchedAccountTableBody"></tbody>
+    </table>
+  </form>
+  
+  <form class="form form--hidden" id="eventLogTableForm">
+    <h1 class="form__title" id="eventLogAccount"></h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Event Id</th>
+          <th>Data Change</th>
+          <th>UserId</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="eventLogTableBody"></tbody>
     </table>
   </form>
 
@@ -156,6 +173,8 @@
     <p class="form__text" id="viewAccountComment"></p>
     <p class="form__text" id="viewAccountDescription"></p>
     <p class="form__text" id="viewAccountUserId"></p>
+    <button class="form__button" id="viewLedgerButton">Open Ledger</button>
+    <button class="form__button" id="viewEventLog">View Event Log</button>
   </form>
 
   <form class="form form--hidden" id="editAccountForm">
@@ -325,6 +344,14 @@
     //when selected user gets stored to update for later
     let selectedUserId = null;
 
+
+    
+
+    
+
+    
+
+
     document.addEventListener("DOMContentLoaded", () => {
         const mainForm = document.querySelector("#mainPage");
         const createNewAccountForm = document.querySelector("#createNewAccount");
@@ -336,6 +363,7 @@
         const searchedAccountTableForm = document.querySelector('#searchedAccountTable');
         const editAccountForm = document.querySelector("#editAccountForm");
         const viewAccountForm = document.querySelector("#viewAccountForm");
+        const eventLogTableForm = document.querySelector('#eventLogTableForm');
 
     
         //on click hides hides create new account and unhides mainpage
@@ -407,6 +435,14 @@
           updateAccountForm.classList.add("form--hidden");
           emailForm.classList.remove("form--hidden");
         })
+
+        document.getElementById('viewLedgerButton').addEventListener('click', e => {
+          e.preventDefault();
+        });
+
+        document.getElementById('viewEventLog').addEventListener('click', e => {
+          e.preventDefault();
+        });
 
         document.getElementById("submitData").addEventListener('click', e => {
             e.preventDefault();
@@ -495,10 +531,10 @@
           document.getElementById('viewAccountCategory').innerText = `Category: ${account.category}`;
           document.getElementById('viewAccountSubCategory').innerText = `Subcategory: ${account.subCategory}`;
           document.getElementById('viewAccountNormalSide').innerText = `Normal Side: ${account.normalSide}`;
-          document.getElementById('viewAccountInitialBalance').innerText = `Initial Balance: ${account.initialBalance}`;
-          document.getElementById('viewAccountBalance').innerText = `Balance: ${account.balance}`;
-          document.getElementById('viewAccountDebit').innerText = `Debit: ${account.debit}`;
-          document.getElementById('viewAccountCredit').innerText = `Credit: ${account.credit}`;
+          document.getElementById('viewAccountInitialBalance').innerText = `Initial Balance: $${formatMonetaryValue(account.initialBalance)}`;
+          document.getElementById('viewAccountBalance').innerText = `Balance: $${formatMonetaryValue(account.balance)}`;
+          document.getElementById('viewAccountDebit').innerText = `Debit: $${formatMonetaryValue(account.debit)}`;
+          document.getElementById('viewAccountCredit').innerText = `Credit: $${formatMonetaryValue(account.credit)}`;
           document.getElementById('viewAccountOrder').innerText = `Order: ${account.order}`;
           document.getElementById('viewAccountStatement').innerText = `Statement: ${account.statement}`;
            document.getElementById('viewAccountComment').innerText = `Comment: ${account.comment}`;
@@ -742,8 +778,6 @@ async function searchAccountByName(accountName) {
         return;
       }
 
-      
-
       // Fetch the user's email address based on the selectedUserId
       const userRef = ref(database, 'users/' + selectedUserId);
       get(userRef)
@@ -785,6 +819,63 @@ async function searchAccountByName(accountName) {
        alert('Error fetching user data: ' + error.message);
      });
     }
+
+    function addEventToLogs(accountName, eventData, eventId) {
+      
+}
+
+      let ascending = true; // Global variable to track sorting direction
+
+      function sortTable(colIndex) {
+        const tbody = document.getElementById('accountTableBody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort((a, b) => {
+          const aCell = a.children[colIndex];
+          const bCell = b.children[colIndex];
+
+          const aVal = aCell ? aCell.textContent.trim() : '';
+          const bVal = bCell ? bCell.textContent.trim() : '';
+
+          if (!isNaN(aVal) && !isNaN(bVal)) {
+            return ascending ? aVal - bVal : bVal - aVal;
+          } else {
+            return ascending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+          }
+        });
+
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+
+        // Update arrow indicators
+        const arrow = ascending ? '↑' : '↓';
+        const thElements = document.querySelectorAll('#accountTableForm thead th');
+        thElements.forEach((th, index) => {
+          // Reset to original content (without arrow or dash)
+          const originalContent = th.textContent.replace('↑', '').replace('↓', '').replace('—', '').trim();
+
+          if (index === colIndex) {
+            // Set the appropriate arrow based on the sorting direction
+            th.textContent = originalContent + ' ' + arrow;
+          } else {
+           // Set a dash for non-sorted columns
+            th.textContent = originalContent + ' —';
+          }
+        });
+
+        ascending = !ascending; // Toggle the sorting direction
+      }
+
+      const headerCells = document.querySelectorAll('#accountTableForm thead th');
+      headerCells.forEach((cell, index) => {
+        const originalContent = cell.textContent.trim(); // Store the original content
+        cell.textContent = originalContent + ' —'; // Add a dash at the beginning
+        cell.addEventListener('click', () => {
+          sortTable(index);
+        });
+      });
+
+    
 
     searchAccountsButton.addEventListener('click', async (e) => {
       var input = document.getElementById('searchAccounts').value;
@@ -828,9 +919,9 @@ async function searchAccountByName(accountName) {
         <td>${formatMonetaryValue(account.balance)}</td>
         <td>${account.date}</td>
         <td>
-          <button class="actionButton" type="button" data-userid="temp" data-action="edit">Edit</button>
-          <button class="actionButton" type="button" data-userid="temp" data-action="delete">Delete</button>
-          <button class="actionButton" type="button" data-userid="temp" data-action="view">View</button>
+          <button class="accountActionButton" type="button" data-account="${account.accountName}" data-action="edit">Edit</button>
+          <button class="accountActionButton" type="button" data-account="${account.accountName}" data-action="delete">Delete</button>
+          <button class="accountActionButton" type="button" data-account="${account.accountName}" data-action="view">View</button>
         </td>
       `;
       searchedAccountTableBody.appendChild(tableRow);
@@ -839,6 +930,18 @@ async function searchAccountByName(accountName) {
       const searchedAccountTableForm = document.querySelector('#searchedAccountTable');
       searchedAccountTableForm.classList.remove('form--hidden');
       accountTableForm.classList.add('form--hidden');
+
+      const actionButtons = document.querySelectorAll('.accountActionButton');
+      actionButtons.forEach(button => {
+      button.addEventListener('click', (event) => {
+        const accountName = event.target.getAttribute('data-account');
+        const action = event.target.getAttribute('data-action');
+        console.log('Clicked on account:', accountName, 'with action:', action);
+
+        accountPerformAction(accountName, action);
+
+      });
+    });
     });
 
     CreateAccountsButton.addEventListener('click', async (e) => {
@@ -949,6 +1052,8 @@ async function searchAccountByName(accountName) {
 
     });
 
+    let currentEventId = 0;
+
     editAccountsButton.addEventListener('click', async (e) => {
 
       var subCategory = document.getElementById('editSubCategory').value;
@@ -996,12 +1101,45 @@ async function searchAccountByName(accountName) {
       const accountRef = ref(database, `accounts/${accountName}`);
 
   try {
-    await update(accountRef, updatedAccountData);
+    const existingAccountData = await get(ref(database, `accounts/${accountName}`)).then((snapshot) => snapshot.val());
+
+    // Merge the existing account data with the updated data
+    const mergedAccountData = { ...existingAccountData, ...updatedAccountData };
+
+    var userInfo = getDataFromQuery();
+    if (!userInfo){
+      userInfo = "empty";
+    }
+
+    var currentDate = new Date();
+    var formattedDate = currentDate.toLocaleString();
+
+    // Fetch the current event count from the database
+    const eventCountRef = ref(database, `accounts/${accountName}/logs/eventCount`);
+    const eventCountSnapshot = await get(eventCountRef);
+    const currentEventId = eventCountSnapshot.val() || 0;
+
+    // Increment the event count
+    const newEventCount = currentEventId + 1;
+    await set(eventCountRef, newEventCount);
+
+    // Create event data object with the incremented eventId
+    const eventData = {
+      eventId: newEventCount,
+      accountDataChanges: mergedAccountData,
+      dateTime: formattedDate,
+      userId: userInfo,
+    };
+
+    // Add the event data to logs
+    await set(ref(database, `accounts/${accountName}/logs/events/${newEventCount}`), eventData);
+
     alert('Account updated successfully');
   } catch (error) {
     console.error('Error updating account:', error);
     alert('Error updating account. Please try again.');
   }
+  
 
     });
 
@@ -1168,18 +1306,42 @@ async function searchAccountByName(accountName) {
             address: updatedAddress,
             cred: cred
           };
-  update(userRef, updates)
-          .then(() => {
-          // Data updated successfully
-          alert('User data updated successfully');
-          })
-          .catch((error) => {
-          // Update failed
-          alert('Failed to update user data: ' + error.message);
+          update(userRef, updates)
+            .then(() => {
+            // Data updated successfully
+            alert('User data updated successfully');
+            })
+            .catch((error) => {
+            // Update failed
+            alert('Failed to update user data: ' + error.message);
+            });
           });
-        });
 
-        
+        document.getElementById('viewEventLog').addEventListener('click', async (e) => {
+          e.preventDefault();
+
+          const eventLogTableForm = document.querySelector('#eventLogTableForm');
+          const viewAccountForm = document.querySelector("#viewAccountForm");
+
+          
+          // Assuming you have the account name available in a variable called accountName
+          const accountName = document.getElementById('eventLogAccount').textContent; // Replace with the actual account name
+  
+
+          const eventsRef = ref(database, `accounts/${accountName}/logs/events`);
+          const eventsSnapshot = await get(eventsRef);
+
+          if (eventsSnapshot.exists()) {
+            
+            eventLogTableForm.classList.remove('form--hidden');
+            viewAccountForm.classList.add('form--hidden');
+
+            const events = eventsSnapshot.val();
+            displayEvents(events);
+          } else {
+          alert('No events found for this account.');
+          }
+        });
 
       document.getElementById('activateUser').addEventListener('click', (e) => {
         e.preventDefault();
@@ -1313,6 +1475,7 @@ async function accountPerformAction(accountName, action) {
   const createNewAccountsForm = document.querySelector("#createNewAccountForm");
   const searchedAccountTableForm = document.querySelector('#searchedAccountTable');
   const viewAccountForm = document.querySelector("#viewAccountForm");
+  const editAccountForm = document.querySelector("#editAccountForm");
 
 
   const accountRef = ref(database, `accounts/${accountName}`);
@@ -1328,6 +1491,11 @@ async function accountPerformAction(accountName, action) {
     editAccountForm.classList.remove("form--hidden");
 
   }else if (action === 'delete'){
+
+    if (accountRef.balance !== 0) {
+      alert('Cannot delete Account while there is still a balance');
+      return;
+    }
     try {
       await remove(accountRef);
       alert('Account deleted successfully');
@@ -1347,10 +1515,48 @@ async function accountPerformAction(accountName, action) {
       createNewAccountForm.classList.add("form--hidden");
       accountTableForm.classList.add("form--hidden");
       viewAccountForm.classList.remove("form--hidden");
+      document.getElementById('eventLogAccount').textContent = accountSnapshot.val().accountName;
     } else {
       alert('Account not found.');
     }
   }
+}
+
+function displayEvents(events) {
+  const viewAccountForm = document.querySelector("#viewAccountForm");
+  const eventLogTableForm = document.querySelector('#eventLogTableForm');
+
+  const eventLogTableBody = document.getElementById('eventLogTableBody');
+  eventLogTableBody.innerHTML = ''; // Clear any existing content
+
+  for (const eventKey in events) {
+    const eventData = events[eventKey];
+    const { eventId, accountDataChanges, dateTime, userId } = eventData;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${eventId}</td>
+      <td>${dateTime}</td>
+      <td>${userId}</td>
+      <td>
+        <button class="viewActionButton" type="button" data-accounts="${eventKey}">Edit</button>
+      </td>
+    `;
+
+    eventLogTableBody.appendChild(row);
+  }
+
+  const actionButtons = document.querySelectorAll('.viewActionButton');
+  actionButtons.forEach(button => {
+    button.addEventListener('click', (event) => {
+      const eventId = event.target.getAttribute('data-accounts');
+      const accountChangedInfo = events[eventId].accountDataChanges;
+      
+      viewAccountForm.classList.remove('form--hidden');
+      eventLogTableForm.classList.add('form--hidden');
+      displayAccountInfo(accountChangedInfo);
+    });
+  });
 }
 
 async function displayAllUsers() {
@@ -1423,7 +1629,7 @@ async function displayAllAccounts() {
         <td>${accountName}</td>
         <td>${category}</td>
         <td>${subCategory}</td>
-        <td>${formatMonetaryValue(balance)}</td>
+        <td>$${formatMonetaryValue(balance)}</td>
         <td>${date}</td>
         <td>
           <button class="accountActionButton" type="button" data-account="${accountName}" data-action="edit">Edit</button>
