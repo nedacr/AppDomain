@@ -45,6 +45,13 @@
   </form>
 
   <form class="form" id="accountTableForm">
+    <div class="form__input-group">
+      <input type="text" id="searchAccounts" class="form__input" autofocus placeholder="Search">
+    <div class="form__input--error-message"></div>
+
+    
+    <button class="form__button" id="searchAccountsButton" type="submit">Search Account</button>
+    </div>
     <table>
       <thead>
         <tr>
@@ -62,6 +69,41 @@
     </table>
 
     <button class="form__button" id="createNewAccountbutton" type="submit">Create New Account</button>
+  </form>
+
+  <form class="form form--hidden" id="searchedAccountTable">
+    <h1 class="form__title">Event Log</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Account Number</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Sub-Category</th>
+          <th>Balance</th>
+          <th>Date Added</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="searchedAccountTableBody"></tbody>
+    </table>
+  </form>
+  
+  <form class="form form--hidden" id="eventLogTableForm">
+    <h1 class="form__title" id="eventLogAccount"></h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Event Id</th>
+          <th>Data Change</th>
+          <th>UserId</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="eventLogTableBody"></tbody>
+    </table>
   </form>
 
   <form class="form form--hidden" id="createNewAccountForm">
@@ -114,6 +156,58 @@
     
     <button class="form__button" id="CreateAccountsButton">Create Account</button>
   </form>
+
+  <form class="form form--hidden" id="viewAccountForm">
+    <h1 class="form__title">View Account</h1>
+    <p class="form__title" id="viewAccountNumber"></p>
+    <p class="form__text" id="viewAccountName"></p>
+    <p class="form__text" id="viewAccountCategory"></p>
+    <p class="form__text" id="viewAccountSubCategory"></p>
+    <p class="form__text" id="viewAccountNormalSide"></p>
+    <p class="form__text" id="viewAccountInitialBalance"></p>
+    <p class="form__text" id="viewAccountBalance"></p>
+    <p class="form__text" id="viewAccountDebit"></p>
+    <p class="form__text" id="viewAccountCredit"></p>
+    <p class="form__text" id="viewAccountOrder"></p>
+    <p class="form__text" id="viewAccountStatement"></p>
+    <p class="form__text" id="viewAccountComment"></p>
+    <p class="form__text" id="viewAccountDescription"></p>
+    <p class="form__text" id="viewAccountUserId"></p>
+    <button class="form__button" id="viewLedgerButton">Open Ledger</button>
+    <button class="form__button" id="viewEventLog">View Event Log</button>
+  </form>
+
+  <form class="form form--hidden" id="editAccountForm">
+    <h1 class="form__title" id="editAccountName"></h1>
+    <div class="form__message form__message--error"></div>
+    <div class="form__input-group">
+      <input type="text" id="editSubCategory" class="form__input" autofocus placeholder="Sub-Category">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="editNormalSide" class="form__input" autofocus placeholder="Normal Side">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="editOrder" class="form__input" autofocus placeholder="Order">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="editStatement" class="form__input" autofocus placeholder="Statement">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="editComment" class="form__input" autofocus placeholder="Comment">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="editDescription" class="form__input" autofocus placeholder="Description">
+      <div class="form__input--error-message"></div>
+    </div>
+    <button class="form__button" id="editAccountsButton">Update Account</button>
+  </form>
+
+  
 
   <form class="form form--hidden" id="createNewAccount">
     <h1 class="form__title">Create New Account</h1>
@@ -226,7 +320,7 @@
 
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-  import { getDatabase, set, ref, update, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+  import { getDatabase, set, ref, update, get, remove } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
   const firebaseConfig = {
           apiKey: "AIzaSyCjKjeEiIpaLybLGQzoPlnGp1D6XYuh8Lw",
@@ -250,6 +344,14 @@
     //when selected user gets stored to update for later
     let selectedUserId = null;
 
+
+    
+
+    
+
+    
+
+
     document.addEventListener("DOMContentLoaded", () => {
         const mainForm = document.querySelector("#mainPage");
         const createNewAccountForm = document.querySelector("#createNewAccount");
@@ -257,7 +359,11 @@
         const emailForm = document.querySelector("#email");
         const tableForm = document.querySelector("#tableForm");
         const accountTableForm = document.querySelector("#accountTableForm");
-        const createNewAccountsForm = document.querySelector("#createNewAccountForm")
+        const createNewAccountsForm = document.querySelector("#createNewAccountForm");
+        const searchedAccountTableForm = document.querySelector('#searchedAccountTable');
+        const editAccountForm = document.querySelector("#editAccountForm");
+        const viewAccountForm = document.querySelector("#viewAccountForm");
+        const eventLogTableForm = document.querySelector('#eventLogTableForm');
 
     
         //on click hides hides create new account and unhides mainpage
@@ -273,6 +379,8 @@
           mainForm.classList.add("form--hidden");
           tableForm.classList.remove("form--hidden");
           accountTableForm.classList.add("form--hidden");
+          searchedAccountTableForm.classList.add("form--hidden");
+          viewAccountForm.classList.add("form--hidden");
         });
 
         document.querySelector("#dashboardButton").addEventListener("click", e => {
@@ -283,6 +391,9 @@
           updateAccountForm.classList.add("form--hidden");
           emailForm.classList.add("form--hidden");
           accountTableForm.classList.add("form--hidden");
+          searchedAccountTableForm.classList.add("form--hidden");
+          editAccountForm.classList.add("form--hidden");
+          viewAccountForm.classList.add("form--hidden");
         });
 
         document.querySelector("#accountsButton").addEventListener("click", e => {
@@ -294,6 +405,9 @@
           emailForm.classList.add("form--hidden");
           createNewAccountsForm.classList.add("form--hidden");
           accountTableForm.classList.remove("form--hidden");
+          searchedAccountTableForm.classList.add("form--hidden");
+          editAccountForm.classList.add("form--hidden");
+          viewAccountForm.classList.add("form--hidden");
         });
 
         document.querySelector("#createNewAccountbutton").addEventListener("click", e => {
@@ -322,12 +436,29 @@
           emailForm.classList.remove("form--hidden");
         })
 
+        document.getElementById('viewLedgerButton').addEventListener('click', e => {
+          e.preventDefault();
+        });
+
+        document.getElementById('viewEventLog').addEventListener('click', e => {
+          e.preventDefault();
+        });
+
         document.getElementById("submitData").addEventListener('click', e => {
             e.preventDefault();
         });
 
         document.querySelector('#CreateAccountsButton').addEventListener('click', (e) => {
         e.preventDefault(); 
+        });
+
+        document.querySelector('#searchAccountsButton').addEventListener('click', (e) => {
+        e.preventDefault(); 
+        
+        });
+
+        document.querySelector('#editAccountsButton').addEventListener('click', (e) => {
+          e.preventDefault();
         });
 
         document.getElementById('updateData').addEventListener('click', (e) => {
@@ -374,7 +505,42 @@
           }
         }
 
-        
+        async function updateAccountFromData(accountRef) {
+          const accountSnapshot = await get(accountRef);
+           if (accountSnapshot.exists()) {
+              const account = accountSnapshot.val();
+              console.log('Account data:', account);
+
+               // Update form fields with account data
+              document.getElementById('editSubCategory').value = account.subCategory;
+             document.getElementById('editNormalSide').value = account.normalSide;
+              document.getElementById('editOrder').value = account.order;
+              document.getElementById('editStatement').value = account.statement;
+              document.getElementById('editComment').value = account.comment;
+              document.getElementById('editDescription').value = account.description;
+              document.getElementById('editAccountName').textContent = account.accountName;
+
+            } else {
+              console.log('Account not found.');
+            }
+        }
+
+        function displayAccountInfo(account) {
+          document.getElementById('viewAccountNumber').innerText = `Account Number: ${account.accountNumber}`;
+          document.getElementById('viewAccountName').innerText = `Account Name: ${account.accountName}`;
+          document.getElementById('viewAccountCategory').innerText = `Category: ${account.category}`;
+          document.getElementById('viewAccountSubCategory').innerText = `Subcategory: ${account.subCategory}`;
+          document.getElementById('viewAccountNormalSide').innerText = `Normal Side: ${account.normalSide}`;
+          document.getElementById('viewAccountInitialBalance').innerText = `Initial Balance: $${formatMonetaryValue(account.initialBalance)}`;
+          document.getElementById('viewAccountBalance').innerText = `Balance: $${formatMonetaryValue(account.balance)}`;
+          document.getElementById('viewAccountDebit').innerText = `Debit: $${formatMonetaryValue(account.debit)}`;
+          document.getElementById('viewAccountCredit').innerText = `Credit: $${formatMonetaryValue(account.credit)}`;
+          document.getElementById('viewAccountOrder').innerText = `Order: ${account.order}`;
+          document.getElementById('viewAccountStatement').innerText = `Statement: ${account.statement}`;
+           document.getElementById('viewAccountComment').innerText = `Comment: ${account.comment}`;
+          document.getElementById('viewAccountDescription').innerText = `Description: ${account.description}`;
+          document.getElementById('viewAccountUserId').innerText = `User ID: ${account.userId}`;
+        }
 
 
 
@@ -567,6 +733,39 @@
       return accountNumbers;
     }
 
+    async function searchAccountByAccountNumber(accountNumbers) {
+      const accountsRef = ref(database, 'accounts');
+
+      const accountsSnapshot = await get(accountsRef);
+
+      if (accountsSnapshot.exists()) {
+        const accounts = accountsSnapshot.val();
+        console.log(accounts);
+        for (const accountName in accounts) {
+          console.log(accounts[accountName].accountNumber, accountNumbers);
+          // Convert accountNumbers to a number for proper comparison
+          const accountNumbersAsNumber = parseInt(accountNumbers, 10);
+          if (accounts[accountName].accountNumber === accountNumbersAsNumber) {
+            console.log('Account found for account number:', accountNumbers);
+            return accounts[accountName];
+          }
+        }
+      }
+
+      return null;
+    }
+
+async function searchAccountByName(accountName) {
+  const accountRef = ref(database, 'accounts/' + accountName);
+  const snapshot = await get(accountRef);
+
+  if (snapshot.exists()) {
+    return snapshot.val();
+  }
+
+  return null;
+}
+
 
     function getDataFromQuery() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -578,8 +777,6 @@
         alert('No user selected.');
         return;
       }
-
-      
 
       // Fetch the user's email address based on the selectedUserId
       const userRef = ref(database, 'users/' + selectedUserId);
@@ -623,6 +820,130 @@
      });
     }
 
+    function addEventToLogs(accountName, eventData, eventId) {
+      
+}
+
+      let ascending = true; // Global variable to track sorting direction
+
+      function sortTable(colIndex) {
+        const tbody = document.getElementById('accountTableBody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort((a, b) => {
+          const aCell = a.children[colIndex];
+          const bCell = b.children[colIndex];
+
+          const aVal = aCell ? aCell.textContent.trim() : '';
+          const bVal = bCell ? bCell.textContent.trim() : '';
+
+          if (!isNaN(aVal) && !isNaN(bVal)) {
+            return ascending ? aVal - bVal : bVal - aVal;
+          } else {
+            return ascending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+          }
+        });
+
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+
+        // Update arrow indicators
+        const arrow = ascending ? '↑' : '↓';
+        const thElements = document.querySelectorAll('#accountTableForm thead th');
+        thElements.forEach((th, index) => {
+          // Reset to original content (without arrow or dash)
+          const originalContent = th.textContent.replace('↑', '').replace('↓', '').replace('—', '').trim();
+
+          if (index === colIndex) {
+            // Set the appropriate arrow based on the sorting direction
+            th.textContent = originalContent + ' ' + arrow;
+          } else {
+           // Set a dash for non-sorted columns
+            th.textContent = originalContent + ' —';
+          }
+        });
+
+        ascending = !ascending; // Toggle the sorting direction
+      }
+
+      const headerCells = document.querySelectorAll('#accountTableForm thead th');
+      headerCells.forEach((cell, index) => {
+        const originalContent = cell.textContent.trim(); // Store the original content
+        cell.textContent = originalContent + ' —'; // Add a dash at the beginning
+        cell.addEventListener('click', () => {
+          sortTable(index);
+        });
+      });
+
+    
+
+    searchAccountsButton.addEventListener('click', async (e) => {
+      var input = document.getElementById('searchAccounts').value;
+      
+      if(!input){
+        setInputError(document.getElementById('searchAccounts'), 'Please enter the Account Name or Number you would like to search for');
+      }
+
+      //numnbers only check
+      const numberPattern = /^[0-9]+$/;
+
+      let account;
+
+      //checks if input is only numbers (only numbers will only check Account Number, any thing else will check account Name)
+    if (numberPattern.test(input)) {
+    // Search by account number
+
+      account = await searchAccountByAccountNumber(input);
+      console.log('Account found by account number:', account);
+    
+    } else {
+      // Search by account name
+      account = await searchAccountByName(input);
+      console.log('Account found by account name:', account);
+    }
+
+    if(account === null){
+      alert('no account found using this search parameter');
+      return;
+    }
+
+    const searchedAccountTableBody = document.getElementById('searchedAccountTableBody');
+    searchedAccountTableBody.innerHTML = '';  // Clear previous data in the table
+
+    const tableRow = document.createElement('tr');
+      tableRow.innerHTML = `
+        <td>${account.accountNumber}</td>
+        <td>${account.accountName}</td>
+        <td>${account.category}</td>
+        <td>${account.subCategory}</td>
+        <td>${formatMonetaryValue(account.balance)}</td>
+        <td>${account.date}</td>
+        <td>
+          <button class="accountActionButton" type="button" data-account="${account.accountName}" data-action="edit">Edit</button>
+          <button class="accountActionButton" type="button" data-account="${account.accountName}" data-action="delete">Delete</button>
+          <button class="accountActionButton" type="button" data-account="${account.accountName}" data-action="view">View</button>
+        </td>
+      `;
+      searchedAccountTableBody.appendChild(tableRow);
+      
+      const accountTableForm = document.querySelector("#accountTableForm");
+      const searchedAccountTableForm = document.querySelector('#searchedAccountTable');
+      searchedAccountTableForm.classList.remove('form--hidden');
+      accountTableForm.classList.add('form--hidden');
+
+      const actionButtons = document.querySelectorAll('.accountActionButton');
+      actionButtons.forEach(button => {
+      button.addEventListener('click', (event) => {
+        const accountName = event.target.getAttribute('data-account');
+        const action = event.target.getAttribute('data-action');
+        console.log('Clicked on account:', accountName, 'with action:', action);
+
+        accountPerformAction(accountName, action);
+
+      });
+    });
+    });
+
     CreateAccountsButton.addEventListener('click', async (e) => {
       var accountName = document.getElementById('accountName').value;
       var category =document.getElementById('category').value;
@@ -637,8 +958,8 @@
       var description = document.getElementById('description').value;
       
       getAllAccountNumbers().then(accountNumbers => {
-  console.log('List of account numbers:', accountNumbers);
-});
+        console.log('List of account numbers:', accountNumbers);
+      });
       
       //Check for correct values
       if (!accountName || (!category || (category !== 'assets' && category !== 'liabilities')) || !subCategory || (!normalSide || (normalSide !== 'debit' && normalSide !== 'credit')) || !initialBalance || !debit || !credit || !order || !statement || !comment || !description){
@@ -728,6 +1049,97 @@
       })
 
       alert('account created');
+
+    });
+
+    let currentEventId = 0;
+
+    editAccountsButton.addEventListener('click', async (e) => {
+
+      var subCategory = document.getElementById('editSubCategory').value;
+      var normalSide = document.getElementById('editNormalSide').value;
+      var order = document.getElementById('editOrder').value;
+      var statement = document.getElementById('editStatement').value;
+      var comment = document.getElementById('editComment').value;
+      var description = document.getElementById('editDescription').value;
+
+      if (!subCategory || !normalSide || !order || !statement || !comment || !description){
+        
+        if(!subCategory){
+          setInputError(document.getElementById('editSubCategory'), 'Please enter the Account Sub-Catergory');
+        }
+        if(!normalSide){
+          setInputError(document.getElementById('editNormalSide'), 'Please enter the Account normal side');
+        }
+        if(!order){
+          setInputError(document.getElementById('editOrder'), 'Please enter the order');
+        }
+        if(!statement){
+          setInputError(document.getElementById('editStatement'), 'Please enter the statement');
+        }
+        if(!comment){
+          setInputError(document.getElementById('editComment'), 'Please enter A comment');
+        }
+        if(!description){
+          setInputError(document.getElementById('editDescription'), 'Please enter a description');
+        }
+        
+        return;
+      }
+
+      var accountName = document.getElementById('editAccountName').textContent;
+
+      const updatedAccountData = {
+        subCategory : subCategory,
+        normalSide : normalSide,
+        order : order,
+        statement : statement,
+        comment : comment,
+        description : description
+      };
+
+      const accountRef = ref(database, `accounts/${accountName}`);
+
+  try {
+    const existingAccountData = await get(ref(database, `accounts/${accountName}`)).then((snapshot) => snapshot.val());
+
+    // Merge the existing account data with the updated data
+    const mergedAccountData = { ...existingAccountData, ...updatedAccountData };
+
+    var userInfo = getDataFromQuery();
+    if (!userInfo){
+      userInfo = "empty";
+    }
+
+    var currentDate = new Date();
+    var formattedDate = currentDate.toLocaleString();
+
+    // Fetch the current event count from the database
+    const eventCountRef = ref(database, `accounts/${accountName}/logs/eventCount`);
+    const eventCountSnapshot = await get(eventCountRef);
+    const currentEventId = eventCountSnapshot.val() || 0;
+
+    // Increment the event count
+    const newEventCount = currentEventId + 1;
+    await set(eventCountRef, newEventCount);
+
+    // Create event data object with the incremented eventId
+    const eventData = {
+      eventId: newEventCount,
+      accountDataChanges: mergedAccountData,
+      dateTime: formattedDate,
+      userId: userInfo,
+    };
+
+    // Add the event data to logs
+    await set(ref(database, `accounts/${accountName}/logs/events/${newEventCount}`), eventData);
+
+    alert('Account updated successfully');
+  } catch (error) {
+    console.error('Error updating account:', error);
+    alert('Error updating account. Please try again.');
+  }
+  
 
     });
 
@@ -894,18 +1306,42 @@
             address: updatedAddress,
             cred: cred
           };
-  update(userRef, updates)
-          .then(() => {
-          // Data updated successfully
-          alert('User data updated successfully');
-          })
-          .catch((error) => {
-          // Update failed
-          alert('Failed to update user data: ' + error.message);
+          update(userRef, updates)
+            .then(() => {
+            // Data updated successfully
+            alert('User data updated successfully');
+            })
+            .catch((error) => {
+            // Update failed
+            alert('Failed to update user data: ' + error.message);
+            });
           });
+
+        document.getElementById('viewEventLog').addEventListener('click', async (e) => {
+          e.preventDefault();
+
+          const eventLogTableForm = document.querySelector('#eventLogTableForm');
+          const viewAccountForm = document.querySelector("#viewAccountForm");
+
+          
+          // Assuming you have the account name available in a variable called accountName
+          const accountName = document.getElementById('eventLogAccount').textContent; // Replace with the actual account name
+  
+
+          const eventsRef = ref(database, `accounts/${accountName}/logs/events`);
+          const eventsSnapshot = await get(eventsRef);
+
+          if (eventsSnapshot.exists()) {
+            
+            eventLogTableForm.classList.remove('form--hidden');
+            viewAccountForm.classList.add('form--hidden');
+
+            const events = eventsSnapshot.val();
+            displayEvents(events);
+          } else {
+          alert('No events found for this account.');
+          }
         });
-
-
 
       document.getElementById('activateUser').addEventListener('click', (e) => {
         e.preventDefault();
@@ -1028,6 +1464,101 @@ function performAction(userId, action) {
   }
 }
 
+//called in accountTable
+async function accountPerformAction(accountName, action) {
+  const mainForm = document.querySelector("#mainPage");
+  const createNewAccountForm = document.querySelector("#createNewAccount");
+  const updateAccountForm = document.querySelector("#updateAccount");
+  const emailForm = document.querySelector("#email");
+  const tableForm = document.querySelector("#tableForm");
+  const accountTableForm = document.querySelector("#accountTableForm");
+  const createNewAccountsForm = document.querySelector("#createNewAccountForm");
+  const searchedAccountTableForm = document.querySelector('#searchedAccountTable');
+  const viewAccountForm = document.querySelector("#viewAccountForm");
+  const editAccountForm = document.querySelector("#editAccountForm");
+
+
+  const accountRef = ref(database, `accounts/${accountName}`);
+
+  if (action === 'edit') {
+    
+    const userRef = ref(database, `accounts/${accountName}`);
+    updateAccountFromData(userRef);
+
+    searchedAccountTableForm.classList.add("form--hidden");
+    createNewAccountForm.classList.add("form--hidden");
+    accountTableForm.classList.add("form--hidden");
+    editAccountForm.classList.remove("form--hidden");
+
+  }else if (action === 'delete'){
+
+    if (accountRef.balance !== 0) {
+      alert('Cannot delete Account while there is still a balance');
+      return;
+    }
+    try {
+      await remove(accountRef);
+      alert('Account deleted successfully');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert('Error deleting account. Please try again.');
+    }
+  }else if (action === 'view'){
+    const accountSnapshot = await get(accountRef);
+
+    if (accountSnapshot.exists()) {
+      const account = accountSnapshot.val();
+      displayAccountInfo(account);
+
+      // Hide other forms and show the viewAccountForm
+      searchedAccountTableForm.classList.add("form--hidden");
+      createNewAccountForm.classList.add("form--hidden");
+      accountTableForm.classList.add("form--hidden");
+      viewAccountForm.classList.remove("form--hidden");
+      document.getElementById('eventLogAccount').textContent = accountSnapshot.val().accountName;
+    } else {
+      alert('Account not found.');
+    }
+  }
+}
+
+function displayEvents(events) {
+  const viewAccountForm = document.querySelector("#viewAccountForm");
+  const eventLogTableForm = document.querySelector('#eventLogTableForm');
+
+  const eventLogTableBody = document.getElementById('eventLogTableBody');
+  eventLogTableBody.innerHTML = ''; // Clear any existing content
+
+  for (const eventKey in events) {
+    const eventData = events[eventKey];
+    const { eventId, accountDataChanges, dateTime, userId } = eventData;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${eventId}</td>
+      <td>${dateTime}</td>
+      <td>${userId}</td>
+      <td>
+        <button class="viewActionButton" type="button" data-accounts="${eventKey}">Edit</button>
+      </td>
+    `;
+
+    eventLogTableBody.appendChild(row);
+  }
+
+  const actionButtons = document.querySelectorAll('.viewActionButton');
+  actionButtons.forEach(button => {
+    button.addEventListener('click', (event) => {
+      const eventId = event.target.getAttribute('data-accounts');
+      const accountChangedInfo = events[eventId].accountDataChanges;
+      
+      viewAccountForm.classList.remove('form--hidden');
+      eventLogTableForm.classList.add('form--hidden');
+      displayAccountInfo(accountChangedInfo);
+    });
+  });
+}
+
 async function displayAllUsers() {
   const usersRef = ref(database, 'users');
   const usersSnapshot = await get(usersRef);
@@ -1098,27 +1629,29 @@ async function displayAllAccounts() {
         <td>${accountName}</td>
         <td>${category}</td>
         <td>${subCategory}</td>
-        <td>${formatMonetaryValue(balance)}</td>
+        <td>$${formatMonetaryValue(balance)}</td>
         <td>${date}</td>
         <td>
-          <button class="actionButton" type="button" data-userid="temp" data-action="edit">Edit</button>
-          <button class="actionButton" type="button" data-userid="temp" data-action="delete">Delete</button>
-          <button class="actionButton" type="button" data-userid="temp" data-action="view">View</button>
+          <button class="accountActionButton" type="button" data-account="${accountName}" data-action="edit">Edit</button>
+          <button class="accountActionButton" type="button" data-account="${accountName}" data-action="delete">Delete</button>
+          <button class="accountActionButton" type="button" data-account="${accountName}" data-action="view">View</button>
         </td>
       `;
 
       accountTableBody.appendChild(tableRow);
       index++;
     }
-    /*const actionButtons = document.querySelectorAll('.actionButton');
-  actionButtons.forEach(button => {
-    button.addEventListener('click', (event) => {
-      
-      const userId = event.target.getAttribute('data-userid');
-      const action = event.target.getAttribute('data-action');
-      performAction(userId, action);
-    })
-  });*/
+    const actionButtons = document.querySelectorAll('.accountActionButton');
+    actionButtons.forEach(button => {
+      button.addEventListener('click', (event) => {
+        const accountName = event.target.getAttribute('data-account');
+        const action = event.target.getAttribute('data-action');
+        console.log('Clicked on account:', accountName, 'with action:', action);
+
+        accountPerformAction(accountName, action);
+
+      });
+    });
   } else {
     // Handle case where there are no users
     const userTableBody = document.getElementById('userTableBody');
