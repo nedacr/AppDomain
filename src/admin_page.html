@@ -381,6 +381,7 @@
           accountTableForm.classList.add("form--hidden");
           searchedAccountTableForm.classList.add("form--hidden");
           viewAccountForm.classList.add("form--hidden");
+          eventLogTableForm.classList.add("form--hidden");
         });
 
         document.querySelector("#dashboardButton").addEventListener("click", e => {
@@ -394,6 +395,7 @@
           searchedAccountTableForm.classList.add("form--hidden");
           editAccountForm.classList.add("form--hidden");
           viewAccountForm.classList.add("form--hidden");
+          eventLogTableForm.classList.add("form--hidden");
         });
 
         document.querySelector("#accountsButton").addEventListener("click", e => {
@@ -408,6 +410,7 @@
           searchedAccountTableForm.classList.add("form--hidden");
           editAccountForm.classList.add("form--hidden");
           viewAccountForm.classList.add("form--hidden");
+          eventLogTableForm.classList.add("form--hidden");
         });
 
         document.querySelector("#createNewAccountbutton").addEventListener("click", e => {
@@ -1539,7 +1542,7 @@ function displayEvents(events) {
       <td>${dateTime}</td>
       <td>${userId}</td>
       <td>
-        <button class="viewActionButton" type="button" data-accounts="${eventKey}">Edit</button>
+        <button class="viewActionButton" type="button" data-accounts="${eventKey}">View</button>
       </td>
     `;
 
