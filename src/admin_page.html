@@ -11,11 +11,11 @@
   <img id="userImage" alt="User Image" src="newuser.png" class="userPicture">
   <div class="banner">
     <h1 id="dataDisplay"></h1>
-    <button class="banner-button" id="dashboardButton" type="submit">Dashboard</button>
-    <button class="banner-button" id="userButton" type="submit">Users</button>
-    <button class="banner-button" id="accountsButton" type="submit">Accounts</button>
+    <button class="banner-button" id="dashboardButton" type="submit" title="Go to Dashboard">Dashboard</button>
+    <button class="banner-button" id="userButton" type="submit" title="Go to Users Page">Users</button>
+    <button class="banner-button" id="accountsButton" type="submit" title="Go to Chart of Accounts">Accounts</button>
     <button class="banner-button" type="submit">Button 3</button>
-    <button class="banner-button" type="submit">Button 4</button>
+    <button class="banner-button" type="submit">?</button>
   </div>
   
   <div class="container">
@@ -41,7 +41,7 @@
 
       <tbody id="userTableBody"></tbody>
     </table>
-    <button class="form__button" id="createUsers" type="submit">Create New User</button>
+    <button class="form__button" id="createUsers" type="submit" title="Create a New User">Create New User</button>
   </form>
 
   <form class="form" id="accountTableForm">
@@ -50,7 +50,7 @@
     <div class="form__input--error-message"></div>
 
     
-    <button class="form__button" id="searchAccountsButton" type="submit">Search Account</button>
+    <button class="form__button" id="searchAccountsButton" type="submit" title="Search Accounts using Account Number or Name">Search Account</button>
     </div>
     <table>
       <thead>
@@ -68,7 +68,7 @@
       <tbody id="accountTableBody"></tbody>
     </table>
 
-    <button class="form__button" id="createNewAccountbutton" type="submit">Create New Account</button>
+    <button class="form__button" id="createNewAccountbutton" type="submit" title="Create a new Finance Account">Create New Account</button>
   </form>
 
   <form class="form form--hidden" id="searchedAccountTable">
@@ -154,27 +154,80 @@
       <div class="form__input--error-message"></div>
     </div>
     
-    <button class="form__button" id="CreateAccountsButton">Create Account</button>
+    <button class="form__button" id="CreateAccountsButton" title="Create a New Finance Account">Create Account</button>
   </form>
 
   <form class="form form--hidden" id="viewAccountForm">
     <h1 class="form__title">View Account</h1>
-    <p class="form__title" id="viewAccountNumber"></p>
-    <p class="form__text" id="viewAccountName"></p>
-    <p class="form__text" id="viewAccountCategory"></p>
-    <p class="form__text" id="viewAccountSubCategory"></p>
-    <p class="form__text" id="viewAccountNormalSide"></p>
-    <p class="form__text" id="viewAccountInitialBalance"></p>
-    <p class="form__text" id="viewAccountBalance"></p>
-    <p class="form__text" id="viewAccountDebit"></p>
-    <p class="form__text" id="viewAccountCredit"></p>
-    <p class="form__text" id="viewAccountOrder"></p>
-    <p class="form__text" id="viewAccountStatement"></p>
-    <p class="form__text" id="viewAccountComment"></p>
-    <p class="form__text" id="viewAccountDescription"></p>
-    <p class="form__text" id="viewAccountUserId"></p>
-    <button class="form__button" id="viewLedgerButton">Open Ledger</button>
-    <button class="form__button" id="viewEventLog">View Event Log</button>
+    
+    <table id="accountTable">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Account Number</td>
+          <td id="viewAccountNumber"></td>
+        </tr>
+        <tr>
+          <td>Account Name</td>
+          <td id="viewAccountName"></td>
+        </tr>
+        <tr>
+          <td>Category</td>
+          <td id="viewAccountCategory"></td>
+        </tr>
+        <tr>
+          <td>Subcategory</td>
+          <td id="viewAccountSubCategory"></td>
+        </tr>
+        <tr>
+          <td>Normal Side</td>
+          <td id="viewAccountNormalSide"></td>
+        </tr>
+        <tr>
+          <td>Initial Balance</td>
+          <td id="viewAccountInitialBalance"></td>
+        </tr>
+        <tr>
+          <td>Balance</td>
+          <td id="viewAccountBalance"></td>
+        </tr>
+        <tr>
+          <td>Debit</td>
+          <td id="viewAccountDebit"></td>
+        </tr>
+        <tr>
+          <td>Credit</td>
+          <td id="viewAccountCredit"></td>
+        </tr>
+        <tr>
+          <td>Order</td>
+          <td id="viewAccountOrder"></td>
+        </tr>
+        <tr>
+          <td>Statement</td>
+          <td id="viewAccountStatement"></td>
+        </tr>
+        <tr>
+          <td>Comment</td>
+          <td id="viewAccountComment"></td>
+        </tr>
+        <tr>
+          <td>Description</td>
+          <td id="viewAccountDescription"></td>
+        </tr>
+        <tr>
+          <td>UserId</td>
+          <td id="viewAccountUserId"></td>
+        </tr>
+      </tbody>
+    </table>
+    <button class="form__button" id="viewLedgerButton" title="Open Ledger Page">Open Ledger</button>
+    <button class="form__button" id="viewEventLog" title="Open Event Log Page">View Event Log</button>
   </form>
 
   <form class="form form--hidden" id="editAccountForm">
@@ -204,7 +257,7 @@
       <input type="text" id="editDescription" class="form__input" autofocus placeholder="Description">
       <div class="form__input--error-message"></div>
     </div>
-    <button class="form__button" id="editAccountsButton">Update Account</button>
+    <button class="form__button" id="editAccountsButton" title="Update Account Information">Update Account</button>
   </form>
 
   
@@ -240,7 +293,7 @@
         <input type="text" id="authentication" class="form__input" autofocus placeholder="Authentication">
         <div class="form__input--error-message"></div>
       </div>
-      <button class="form__button" id="submitData">Create Account</button>
+      <button class="form__button" id="submitData" title="Create a New User Account">Create Account</button>
       <p class="form__text">
         <a href="#" class="form__link"></a>
       </p>
@@ -279,9 +332,9 @@
         <input type="text" id="updateauthentication" class="form__input" autofocus placeholder="Authentication">
         <div class="form__input--error-message"></div>
       </div>
-      <button class="form__button" id="updateData">Update Account</button>
-      <button class="form__button" id="activateUser"></button>
-      <button class="form__button" id="emailUser">Send Email to User</button>
+      <button class="form__button" id="updateData" title="Update User Account Information">Update Account</button>
+      <button class="form__button" id="activateUser" title="Activate or Deactivate User Account"></button>
+      <button class="form__button" id="emailUser" title="Send Email to User Account Email">Send Email to User</button>
       <p class="form__text">
         <a href="#" class="form__link"></a>
       </p>
@@ -300,7 +353,7 @@
     </div>
     
   
-    <button class="form__button" id="sendEmailButton">Send Email</button>
+    <button class="form__button" id="sendEmailButton" title="Send Email">Send Email</button>
   </form>
   </div>
   <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
@@ -922,9 +975,9 @@ async function searchAccountByName(accountName) {
         <td>${formatMonetaryValue(account.balance)}</td>
         <td>${account.date}</td>
         <td>
-          <button class="accountActionButton" type="button" data-account="${account.accountName}" data-action="edit">Edit</button>
-          <button class="accountActionButton" type="button" data-account="${account.accountName}" data-action="delete">Delete</button>
-          <button class="accountActionButton" type="button" data-account="${account.accountName}" data-action="view">View</button>
+          <button class="accountActionButton" title="Edit Account Information" type="button" data-account="${account.accountName}" data-action="edit">Edit</button>
+          <button class="accountActionButton" title="Delete Account" type="button" data-account="${account.accountName}" data-action="delete">Delete</button>
+          <button class="accountActionButton" title="View Account" type="button" data-account="${account.accountName}" data-action="view">View</button>
         </td>
       `;
       searchedAccountTableBody.appendChild(tableRow);
@@ -1542,7 +1595,7 @@ function displayEvents(events) {
       <td>${dateTime}</td>
       <td>${userId}</td>
       <td>
-        <button class="viewActionButton" type="button" data-accounts="${eventKey}">View</button>
+        <button class="viewActionButton" title="View Account Information" type="button" data-accounts="${eventKey}">View</button>
       </td>
     `;
 
@@ -1586,9 +1639,9 @@ async function displayAllUsers() {
         <td>${active ? 'Active' : 'Inactive'}</td>
         <td>${cred}</td>
         <td>
-          <button class="actionButton" type="button" data-userid="${userId}" data-action="edit">Edit</button>
-          <button class="actionButton" type="button" data-userid="${userId}" data-action="delete">Delete</button>
-          <button class="actionButton" type="button" data-userid="${userId}" data-action="view">View</button>
+          <button class="actionButton" title="Edit Account Information" type="button" data-userid="${userId}" data-action="edit">Edit</button>
+          <button class="actionButton" title="Delete Account" type="button" data-userid="${userId}" data-action="delete">Delete</button>
+          <button class="actionButton" title="View Account Information" type="button" data-userid="${userId}" data-action="view">View</button>
         </td>
       `;
 
@@ -1635,9 +1688,9 @@ async function displayAllAccounts() {
         <td>$${formatMonetaryValue(balance)}</td>
         <td>${date}</td>
         <td>
-          <button class="accountActionButton" type="button" data-account="${accountName}" data-action="edit">Edit</button>
-          <button class="accountActionButton" type="button" data-account="${accountName}" data-action="delete">Delete</button>
-          <button class="accountActionButton" type="button" data-account="${accountName}" data-action="view">View</button>
+          <button class="accountActionButton" title="Edit Account Information" type="button" data-account="${accountName}" data-action="edit">Edit</button>
+          <button class="accountActionButton" title="Delete Account" type="button" data-account="${accountName}" data-action="delete">Delete</button>
+          <button class="accountActionButton" title="View Account Information" type="button" data-account="${accountName}" data-action="view">View</button>
         </td>
       `;
 
