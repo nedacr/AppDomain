@@ -9,17 +9,26 @@
 <body>
   <img src="logo.png" alt="Logo" class="logo">
   <img id="userImage" alt="User Image" src="newuser.png" class="userPicture">
+  
   <div class="banner">
     <h1 id="dataDisplay"></h1>
     <button class="banner-button" id="dashboardButton" type="submit" title="Go to Dashboard">Dashboard</button>
     <button class="banner-button" id="userButton" type="submit" title="Go to Users Page">Users</button>
     <button class="banner-button" id="accountsButton" type="submit" title="Go to Chart of Accounts">Accounts</button>
-    <button class="banner-button" type="submit">Button 3</button>
+    <button class="banner-button" type="submit" >Button 3</button>
     <button class="banner-button" type="submit">?</button>
+
+    <button class="banner-button popup-trigger" title="Open Calendar Popup">Calendar</button>
+
+    <div id="calendarPopup" class="popup">
+      <img id="calendar" alt="Calendar Image" src="calander.png">
+    </div>
+
+<div class="overlay"></div>
   </div>
   
   <div class="container">
-    <form class="form form--hidden" id="mainPage">
+    <form class="form" id="mainPage">
     <h2>Main Content</h2>
     <p>This is the main content of your webpage contained within a container.</p>
     <p>Content Goes Here</p>
@@ -44,7 +53,7 @@
     <button class="form__button" id="createUsers" type="submit" title="Create a New User">Create New User</button>
   </form>
 
-  <form class="form" id="accountTableForm">
+  <form class="form form--hidden" id="accountTableForm">
     <div class="form__input-group">
       <input type="text" id="searchAccounts" class="form__input" autofocus placeholder="Search">
     <div class="form__input--error-message"></div>
@@ -1189,6 +1198,16 @@ async function searchAccountByName(accountName) {
 
     // Add the event data to logs
     await set(ref(database, `accounts/${accountName}/logs/events/${newEventCount}`), eventData);
+    update(accountRef, updatedAccountData)
+            .then(() => {
+            // Data updated successfully
+            alert('Account data updated successfully');
+            })
+            .catch((error) => {
+            // Update failed
+            alert('Account to update user data: ' + error.message);
+            });
+          
 
     alert('Account updated successfully');
   } catch (error) {
