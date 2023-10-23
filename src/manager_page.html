@@ -14,7 +14,7 @@
     <button class="banner-button" id="dashboardButton" type="submit" title="Go to Dashboard">Dashboard</button>
     
     <button class="banner-button" id="accountsButton" type="submit" title="Go to Chart of Accounts">Accounts</button>
-    <button class="banner-button" type="submit">Button 3</button>
+    <button class="banner-button" id="journalButton" type="submit" title="Go to Journal Page">Journal Entries</button>
     <button class="banner-button" type="submit">?</button>
   </div>
   
@@ -44,7 +44,58 @@
     <button class="form__button" id="createUsers" type="submit" title="Create a New User">Create New User</button>
   </form>
 
-  <form class="form" id="accountTableForm">
+  <form class="form" id="journalPage">
+    <button class="form__button" id="createJournalButton" type="button" title="Create Entries">Create Entries</button>
+    <h1>Approved Entries</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Journal ID</th>
+          <th>Journal Entry Date</th>
+          <th>Accounts</th>
+          <th>credit</th>
+          <th>debit</th>
+          <th>status</th>
+          <th>Approved By</th>
+          <th>Description</th>
+          <th>actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="JournalTableBody"></tbody>
+    </table>
+
+    
+  </form>
+
+  <form class="form form--hidden" id="createJournal">
+    <table>
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Credit</th>
+          <th>Debit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="text" name="account[]" required></td>
+          <td><input type="number" name="credit[]" required></td>
+          <td><input type="number" name="debit[]" required></td>
+        </tr>
+        <tr>
+          <td><input type="text" name="account[]" required></td>
+          <td><input type="number" name="credit[]" required></td>
+          <td><input type="number" name="debit[]" required></td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="button" id="addRow">Add Row</button>
+    <button type="button" id="clearForm">Clear</button>
+    <button type="submitJournalEntry">Submit</button>
+  </form>
+
+  <form class="form form--hidden" id="accountTableForm">
     <div class="form__input-group">
       <input type="text" id="searchAccounts" class="form__input" autofocus placeholder="Search">
     <div class="form__input--error-message"></div>
@@ -417,6 +468,8 @@
         const editAccountForm = document.querySelector("#editAccountForm");
         const viewAccountForm = document.querySelector("#viewAccountForm");
         const eventLogTableForm = document.querySelector('#eventLogTableForm');
+        const createJournalForm = document.querySelector('#createJournal');
+        const journalPageFrom = document.querySelector('#journalPage');
 
     
         //on click hides hides create new account and unhides mainpage
@@ -466,12 +519,7 @@
           eventLogTableForm.classList.add("form--hidden");
         });
 
-        document.querySelector("#createNewAccountbutton").addEventListener("click", e => {
-            e.preventDefault();
-            createNewAccountsForm.classList.remove("form--hidden");
-            accountTableForm.classList.add("form--hidden");
-        });
-
+        
         document.querySelector("#createUsers").addEventListener("click", e => {
             e.preventDefault();
             createNewAccountForm.classList.remove("form--hidden");
@@ -520,6 +568,14 @@
         document.getElementById('updateData').addEventListener('click', (e) => {
           e.preventDefault();
         });
+
+        
+        document.querySelector("#createJournalButton").addEventListener("click", e => {
+            e.preventDefault();
+            createJournalForm.classList.remove("form--hidden");
+            journalPageFrom.classList.add("form--hidden");
+        });
+        
 
         
     });
@@ -598,6 +654,107 @@
           document.getElementById('viewAccountUserId').innerText = `User ID: ${account.userId}`;
         }
 
+        //-------------------------------------------------------------------------------------------------------
+        //journal entries for manager
+        const form = document.getElementById('createJournal');
+        const addRowButton = document.getElementById('addRow');
+        const submitButton = form.querySelector('button[type="submitJournalEntry"]');
+        const tbody = form.querySelector('tbody');
+        const clearButton = document.getElementById('clearForm');
+
+        // Function to add a new row to the table
+        function addRow() {
+          const newRow = document.createElement('tr');
+          newRow.innerHTML = `
+            <td><input type="text" name="account[]" required></td>
+            <td><input type="number" name="credit[]" required></td>
+            <td><input type="number" name="debit[]" required></td>
+          `;
+            tbody.appendChild(newRow);
+        }
+addRowButton.addEventListener('click', addRow);
+
+function clearForm() {
+  form.reset(); // This will reset the form, clearing all data in the table
+}
+
+clearButton.addEventListener('click', clearForm);
+
+
+
+        //adding to database
+        // Function to submit a journal entry to the database
+async function submitJournalEntry(event) {
+  event.preventDefault(); // Prevent the default form submission behavior
+
+  const rows = tbody.querySelectorAll('tr');
+  let totalCredit = 0;
+  let totalDebit = 0;
+
+  // Get the current date and time
+  const currentDate = new Date().toISOString();
+
+  // Generate a unique ID using a timestamp
+  const uniqueId = Date.now().toString(); // You can use another method to generate a unique ID if needed
+
+  const journalData = {};
+
+  // Iterate through each row and collect the data
+  for (let index = 0; index < rows.length; index++) {
+    const row = rows[index];
+    const account = row.querySelector('input[name="account[]"]').value;
+    const credit = parseFloat(row.querySelector('input[name="credit[]"]').value);
+    const debit = parseFloat(row.querySelector('input[name="debit[]"]').value);
+
+    // Check if the entered account name exists in the accounts database
+    const accountSnapshot = await get(ref(database, 'accounts/' + account));
+    if (accountSnapshot.exists()) {
+      if (!journalData[account]) {
+        journalData[account] = [];
+      }
+
+      journalData[account].push({
+        credit,
+        debit,
+      });
+
+      // Calculate the total credit and debit
+      totalCredit += credit;
+      totalDebit += debit;
+    } else {
+      console.error(`Account "${account}" does not exist.`);
+      return; // Exit the function without submitting to the database
+    }
+  }
+
+  // Check if total credit equals total debit
+  if (totalCredit !== totalDebit) {
+    console.error('Total credit does not equal total debit. Please balance the entries.');
+    return; // Exit the function without submitting to the database
+  }
+
+  // Add the date and permission value (2) to the journalData object
+  journalData['date'] = currentDate;
+  journalData['permission'] = 2;
+  journalData['approval'] = getDataFromQuery();
+
+  // Create a reference to the "journalentries" with the unique ID
+  const newEntryRef = ref(database, `journalentries/${uniqueId}`);
+
+  // Store the entire journal data under the unique ID
+  set(newEntryRef, journalData)
+    .then(() => {
+      alert('Journal entry submitted successfully.');
+      
+      form.reset();
+    })
+    .catch((error) => {
+      alert('Error submitting journal entry:', error);
+    });
+}
+
+submitButton.addEventListener('click', submitJournalEntry);
+        //--------------------------------------------------------------------------------------------------------
 
 
         function rearrangeDate(originalDate) {
