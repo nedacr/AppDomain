@@ -72,7 +72,22 @@
       <tbody id="JournalTableBody"></tbody>
     </table>
 
-    
+    <div id="statusFilter">
+      <label>
+        <input type="radio" name="status" value="all" checked>
+        All
+      </label>
+      <label>
+        <input type="radio" name="status" value="waiting"> Waiting for Approval
+      </label>
+      <label>
+        <input type="radio" name="status" value="approved"> Approved
+      </label>
+      <label>
+        <input type="radio" name="status" value="rejected"> Rejected
+      </label>
+    </div>
+
   </form>
 
   <form class="form form--hidden" id="createJournal">
@@ -780,9 +795,11 @@
 
   var journalDescription = document.getElementById('journalDescription').value;
 
-  const rows = tbody.querySelectorAll('tr');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+
   let totalCredit = 0;
   let totalDebit = 0;
+  let encounteredNonZeroCredit = false; // Flag to track non-zero credits
 
   // Get the current date and time
   const currentDate = new Date().toISOString();
@@ -795,12 +812,21 @@
   // Create an object to store account updates
   const accountUpdates = {};
 
-  // Iterate through each row and collect the data
+  // Iterate through the rows in their original order and collect the data
   for (let index = 0; index < rows.length; index++) {
     const row = rows[index];
     const account = row.querySelector('input[name="account[]"]').value;
     const credit = parseFloat(row.querySelector('input[name="credit[]"]').value);
     const debit = parseFloat(row.querySelector('input[name="debit[]"]').value);
+
+    if (credit !== 0) {
+      encounteredNonZeroCredit = true;
+    }
+
+    if (encounteredNonZeroCredit && credit === 0) {
+      alert('You cannot have a zero credit entry after a non-zero credit entry.');
+      return; // Exit the function without submitting to the database
+    }
 
     // Check if the entered account name exists in the accounts database
     const accountSnapshot = await get(ref(database, 'accounts/' + account));
@@ -960,7 +986,6 @@ async function addAccountEventLog(accountName, updates) {
 submitButton.addEventListener('click', submitJournalEntry);
 //--------------------------------------------------------------------------------------------------------
 //journal table
-// Function to fetch and display journal entries
 // Function to fetch and display journal entries
 async function displayJournalEntries() {
   const tableBody = document.getElementById('JournalTableBody');
@@ -1224,6 +1249,74 @@ async function searchJournals() {
     }
   });
 }
+
+
+
+// Function to filter and display journal entries based on status
+function filterAndDisplayJournalEntries(status) {
+  const tableBody = document.getElementById('JournalTableBody');
+  tableBody.innerHTML = ''; // Clear the existing table rows
+
+  // Retrieve the journal entries from the database
+  const journalEntriesRef = ref(database, 'journalentries');
+  get(journalEntriesRef).then((journalEntriesSnapshot) => {
+    if (journalEntriesSnapshot.exists()) {
+      const journalEntries = journalEntriesSnapshot.val();
+
+      // Iterate through the journal entries and create table rows
+      Object.keys(journalEntries).forEach((entryId) => {
+        const entry = journalEntries[entryId];
+        const permissionType = entry.permission;
+        var permissionValue;
+
+        if (permissionType === 1) {
+          permissionValue = "Waiting for Approval";
+        } else if (permissionType === 0) {
+          permissionValue = "Rejected";
+        } else {
+          permissionValue = "Approved";
+        }
+
+        // Check if the entry matches the selected status
+        if (status === 'all' || (status === 'waiting' && permissionType === 1) || status === permissionValue.toLowerCase()) {
+          const row = document.createElement('tr');
+
+          row.innerHTML = `
+            <td>${entryId}</td>
+            <td>${entry.date}</td>
+            <td>${getAccountNames(entry)}</td>
+            <td>${getAccountTotal(entry, 'debit')}</td>
+            <td>${getAccountTotal(entry, 'credit')}</td>
+            <td>${permissionValue}</td>
+            <td>${entry.approval}</td>
+            <td>${entry.description}</td>
+            <td><button class="journalviewButton" type="button" data-entry-id="${entryId}">View</button></td>
+          `;
+
+          // Add an event listener to the "View" button
+          const viewButton = row.querySelector('.journalviewButton');
+          viewButton.addEventListener('click', () => {
+            viewJournalEntry(entryId); // Call a function to display the entry when the button is clicked
+          });
+
+          tableBody.appendChild(row);
+        }
+      });
+    } else {
+      // Handle the case where no journal entries exist
+      tableBody.innerHTML = '<tr><td colspan="8">No journal entries found.</td></tr>';
+    }
+  });
+}
+// Add event listener to the status filter elements
+const statusFilter = document.getElementById('statusFilter');
+statusFilter.addEventListener('change', (event) => {
+  const selectedStatus = event.target.value;
+  filterAndDisplayJournalEntries(selectedStatus);
+});
+
+// Call the function to initially display all journal entries
+filterAndDisplayJournalEntries('all');
 
 
 //---------------------------------------------------------------------------------------------------------
