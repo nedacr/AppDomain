@@ -1089,6 +1089,12 @@ async function searchAccountByName(accountName) {
         return;
       }
 
+
+      var initialBalance = parseFloat(document.getElementById('initialBalance').value);
+var debit = parseFloat(document.getElementById('debit').value);
+var credit = parseFloat(document.getElementById('credit').value);
+var order = parseInt(document.getElementById('order').value);
+
       
       //accountNumber
       const accountNumber = await findNextAvailableAccountNumber(category);
@@ -1102,7 +1108,7 @@ async function searchAccountByName(accountName) {
         subCategory: subCategory,
         normalSide: normalSide,
         initialBalance: initialBalance,
-        balance: balance,
+        balance: initialBalance,
         debit: debit,
         credit: credit,
         order: order,
