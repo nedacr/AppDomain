@@ -44,7 +44,27 @@
     <button class="form__button" id="createUsers" type="submit" title="Create a New User">Create New User</button>
   </form>
 
-  <form class="form" id="journalPage">
+  <form class="form form--hidden" id="viewLedgerPage">
+    <h1 class="form__title" id="ledgerAccount"></h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Journal Entry ID</th>
+          <th>Entry Date</th>
+          <th>Debit</th>
+          <th>Credit</th>
+          <th>Balance At Approval</th>
+          <th>Description</th>
+          <th>Post Reference</th>
+        </tr>
+      </thead>
+
+      <tbody id="LedgerTableBody"></tbody>
+    </table>
+  </form>
+
+  <form class="form form--hidden" id="journalPage">
     <button class="form__button" id="createJournalButton" type="button" title="Create Entries">Create Entries</button>
     <h1>Approved Entries</h1>
     <div class="form__input-group">
@@ -550,7 +570,8 @@
         const eventLogTableForm = document.querySelector('#eventLogTableForm');
         const createJournalForm = document.querySelector('#createJournal');
         const journalPageFrom = document.querySelector('#journalPage');
-        const viewJournalEntryForm = document.querySelector('#viewJournalEntry')
+        const viewJournalEntryForm = document.querySelector('#viewJournalEntry');
+        const viewLedgerPageForm = document.querySelector('#viewLedgerPage');
 
     
         //on click hides hides create new account and unhides mainpage
@@ -586,6 +607,7 @@
           journalPageFrom.classList.add("form--hidden");
           createJournalForm.classList.add("form--hidden");
           viewJournalEntryForm.classList.add("form--hidden");
+          viewLedgerPageForm.classList.add("form--hidden");
         });
 
         document.querySelector("#accountsButton").addEventListener("click", e => {
@@ -604,7 +626,7 @@
           journalPageFrom.classList.add("form--hidden");
           createJournalForm.classList.add("form--hidden");
           viewJournalEntryForm.classList.add("form--hidden");
-          console.log("Button Clicked");
+          viewLedgerPageForm.classList.add("form--hidden");
         });
 
         document.querySelector("#journalButton").addEventListener("click", e => {
@@ -623,6 +645,7 @@
           journalPageFrom.classList.remove("form--hidden");
           createJournalForm.classList.add("form--hidden");
           viewJournalEntryForm.classList.add("form--hidden");
+          viewLedgerPageForm.classList.add("form--hidden");
         });
 
         
@@ -890,7 +913,7 @@
       alert('Journal entry submitted successfully.');
 
       // Update the accounts in the database
-      await updateAccounts(accountUpdates);
+      await updateAccounts(accountUpdates, uniqueId,journalData['date'], journalData['description']);
 
       form.reset();
     })
@@ -901,9 +924,13 @@
 
 
 
-async function updateAccounts(accountUpdates) {
+async function updateAccounts(accountUpdates, uniqueID, date, description) {
   for (const accountName in accountUpdates) {
     const updates = accountUpdates[accountName];
+
+    let uniqueIDTemp = uniqueID;
+    let dateTemp = date;
+    let descriptionTemp = description;
 
     const accountRef = ref(database, `accounts/${accountName}`);
 
@@ -923,11 +950,11 @@ async function updateAccounts(accountUpdates) {
     });
 
     // Add an event log to each updated account
-    await addAccountEventLog(accountName, updates);
+    await addAccountEventLog(accountName, updates, uniqueIDTemp, dateTemp, descriptionTemp);
   }
 }
 
-async function addAccountEventLog(accountName, updates) {
+async function addAccountEventLog(accountName, updates, journalEntryId, journalEntryDate, description) {
   try {
     const accountRef = ref(database, `accounts/${accountName}`);
     const accountSnapshot = await get(accountRef);
@@ -947,7 +974,10 @@ async function addAccountEventLog(accountName, updates) {
     const newEventCount = currentEventId + 1;
     await set(eventCountRef, newEventCount);
 
-    const userIDtemp = getDataFromQuery();
+    let userIDtemp = getDataFromQuery(); // Declare as let, allowing reassignment
+    if (!userIDtemp) {
+      userIDtemp = "empty";
+    }
 
     // Create event data object with the entire updated account data
     const eventData = {
@@ -974,6 +1004,27 @@ async function addAccountEventLog(accountName, updates) {
 
     // Add the event data to logs
     await set(ref(database, `accounts/${accountName}/logs/events/${newEventCount}`), eventData);
+
+    // Add the entry to the account ledger
+    const ledgerEntry = {
+      journalEntryId: journalEntryId,
+      entryDate: journalEntryDate,
+      debit: updates.debit,
+      credit: updates.credit,
+      balance: accountData.balance, // Balance after the entry
+      description: description,
+    };
+
+    // Generate a unique key manually using a timestamp
+const uniqueKey = Date.now().toString(); // You can use another method to generate a unique key
+
+// Create a reference to the ledger under the specific account with the manually generated key
+const ledgerRef = ref(database, `accounts/${accountName}/ledger/${uniqueKey}`);
+
+
+
+    // Store the ledger entry under the unique ID
+    await set(ledgerRef, ledgerEntry);
 
     alert('Account updated successfully');
   } catch (error) {
@@ -1075,12 +1126,23 @@ displayJournalEntries();
 
 
 function viewJournalEntry(entryId) {
+
+  // Create a Set to keep track of the accounts processed
+  const processedAccounts = new Set();
+  
   // Fetch the data associated with the unique ID from the database
   const entryRef = ref(database, `journalentries/${entryId}`);
+  let entryIDTemp = entryId;
   get(entryRef)
     .then((entrySnapshot) => {
       if (entrySnapshot.exists()) {
         const entryData = entrySnapshot.val();
+
+         // Add the entry to the account ledger
+         const journalEntryDate = entryData.date; // Use the date from the entry data
+        const description = entryData.description;
+
+        
 
         const permissionType = entryData.permission;
         var permissionValue;
@@ -1095,7 +1157,7 @@ function viewJournalEntry(entryId) {
           // Show the "Reject Reason" input field
           document.getElementById('rejectReason').style.display = 'block';
         } else if (permissionType === 0) {
-          permissionValue = "rejected";
+          permissionValue = "Rejected";
           // Hide the "Approve" and "Reject" buttons
           document.getElementById('entryApprove').style.display = 'none';
           document.getElementById('entryReject').style.display = 'none';
@@ -1103,7 +1165,7 @@ function viewJournalEntry(entryId) {
           // Hide the "Reject Reason" input field
           document.getElementById('rejectReason').style.display = 'none';
         } else {
-          permissionValue = "approved";
+          permissionValue = "Approved";
           // Hide the "Approve" and "Reject" buttons
           document.getElementById('entryApprove').style.display = 'none';
           document.getElementById('entryReject').style.display = 'none';
@@ -1111,6 +1173,64 @@ function viewJournalEntry(entryId) {
           // Hide the "Reject Reason" input field
           document.getElementById('rejectReason').style.display = 'none';
         }
+
+        // Add an event listener to the "Approve" button
+        const approveButton = document.getElementById('entryApprove');
+        approveButton.addEventListener('click', async () => {
+  // Create a copy of entryData to avoid modifying the original object
+  const updatedEntryData = { ...entryData };
+  // Change permissionType to 2 (approved)
+  updatedEntryData.permission = 2;
+
+  // Update the entry data in the database with the updated copy
+  await set(entryRef, updatedEntryData);
+
+  // Clear the processedAccounts Set to prepare for the new entry
+  processedAccounts.clear();
+
+  // Add the entry data to the event logs of the associated accounts
+  for (const account in updatedEntryData) {
+    if (account !== 'date' && account !== 'permission' && account !== 'approval' && account !== 'description') {
+      const updates = updatedEntryData[account];
+
+      // Check if the account has already been processed in this loop
+      if (!processedAccounts.has(account)) {
+        await addAccountEventLog(account, updates, entryId, journalEntryDate, description);
+
+        // Update account balances
+        const accountRef = ref(database, `accounts/${account}`);
+        const accountSnapshot = await get(accountRef);
+        if (accountSnapshot.exists()) {
+          const accountData = accountSnapshot.val();
+
+          // Update account balance based on credit and debit
+          if (updates.credit) {
+            accountData.balance += updates.credit;
+            accountData.credit += updates.credit;
+          }
+          if (updates.debit) {
+            accountData.balance -= updates.debit;
+            accountData.debit += updates.debit;
+          }
+
+          // Update the account data in the database
+          await set(accountRef, accountData);
+        }
+
+        // Add the account to the processed set to avoid duplicate processing
+        processedAccounts.add(account);
+      }
+    }
+  }
+
+  console.log('after approval:', updatedEntryData);
+
+  // Alert the user
+  alert('Entry approved and added to account event logs');
+
+  // Refresh the displayed journal entries (if needed)
+  filterAndDisplayJournalEntries('all'); // You may want to refresh the entries based on the selected filter
+});
 
         // Populate the viewJournalEntry form with the data
         document.getElementById('viewJounralEntryID').textContent = entryId;
@@ -1139,7 +1259,9 @@ function viewJournalEntry(entryId) {
         // Show the viewJournalEntry form
         const viewJournalEntryForm = document.getElementById('viewJournalEntry');
         const journalPageForm = document.getElementById('journalPage');
+        const viewLedgerPageForm = document.getElementById('viewLedgerPage');
         viewJournalEntryForm.classList.remove('form--hidden');
+        viewLedgerPageForm.classList.add('form--hidden');
         journalPageForm.classList.add('form--hidden');
       } else {
         console.error(`Journal entry with ID ${entryId} not found.`);
@@ -2106,6 +2228,7 @@ var order = parseInt(document.getElementById('order').value);
             alert('Failed to update user data: ' + error.message);
             });
           });
+          
 
         document.getElementById('viewEventLog').addEventListener('click', async (e) => {
           e.preventDefault();
@@ -2114,7 +2237,7 @@ var order = parseInt(document.getElementById('order').value);
           const viewAccountForm = document.querySelector("#viewAccountForm");
 
           
-          // Assuming you have the account name available in a variable called accountName
+          
           const accountName = document.getElementById('eventLogAccount').textContent; // Replace with the actual account name
   
 
@@ -2132,6 +2255,30 @@ var order = parseInt(document.getElementById('order').value);
           alert('No events found for this account.');
           }
         });
+
+      document.getElementById('viewLedgerButton').addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        const viewAccountForm = document.querySelector("#viewAccountForm");
+        const viewLedgerPageForm = document.querySelector('#viewLedgerPage');
+
+        const accountName = document.getElementById('ledgerAccount').textContent;
+
+        const ledgerRef = ref(database, `accounts/${accountName}/ledger`);
+        const legerSnapshot = await get(ledgerRef);
+
+        if (legerSnapshot.exists()) {
+
+          viewAccountForm.classList.add('form--hidden');
+          viewLedgerPageForm.classList.remove('form--hidden');
+
+          const ledger = legerSnapshot.val();
+          displayLedger(ledger);
+        }else{
+          alert('No events found for this account. ');
+        }
+
+      });
 
       document.getElementById('activateUser').addEventListener('click', (e) => {
         e.preventDefault();
@@ -2306,10 +2453,46 @@ async function accountPerformAction(accountName, action) {
       accountTableForm.classList.add("form--hidden");
       viewAccountForm.classList.remove("form--hidden");
       document.getElementById('eventLogAccount').textContent = accountSnapshot.val().accountName;
+      document.getElementById('ledgerAccount').textContent = accountSnapshot.val().accountName;
     } else {
       alert('Account not found.');
     }
   }
+}
+
+function displayLedger(ledger) {
+  const viewLedgerPageForm = document.querySelector('#viewLedgerPage');
+  const ledgerTableBody = document.getElementById('LedgerTableBody');
+  ledgerTableBody.innerHTML = ''; // Clear any existing content
+
+  for (const ledgerKey in ledger) {
+    const ledgerEntry = ledger[ledgerKey];
+    const { journalEntryId, entryDate, debit, credit, balance, description } = ledgerEntry;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${journalEntryId}</td>
+      <td>${entryDate}</td>
+      <td>${debit || ''}</td>
+      <td>${credit || ''}</td>
+      <td>${balance}</td>
+      <td>${description}</td>
+      <td>
+        <button class="viewJournalEntry" title="View Journal Entry" type="button" data-entry="${ledgerKey}" data-journal-id="${journalEntryId}">View Journal Entry</button>
+      </td>
+    `;
+
+    ledgerTableBody.appendChild(row);
+  }
+
+  // Add event listeners to the "View Journal Entry" buttons
+  const viewJournalEntryButtons = document.querySelectorAll('.viewJournalEntry');
+  viewJournalEntryButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const journalEntryId = button.getAttribute('data-journal-id');
+      viewJournalEntry(journalEntryId); // Implement this function to display the specific entry
+    });
+  });
 }
 
 function displayEvents(events) {
