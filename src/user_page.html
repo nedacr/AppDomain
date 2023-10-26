@@ -1,29 +1,556 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="utf-8">
   <title>Main Page</title>
-  <link rel="stylesheet" href="user_page.css">
+  <link rel="stylesheet" href="admin_page.css">
 </head>
 <body>
   <img src="logo.png" alt="Logo" class="logo">
   <img id="userImage" alt="User Image" src="newuser.png" class="userPicture">
   <div class="banner">
     <h1 id="dataDisplay"></h1>
+    <button class="banner-button" id="dashboardButton" type="submit" title="Go to Dashboard">Dashboard</button>
     
+    <button class="banner-button" id="accountsButton" type="submit" title="Go to Chart of Accounts">Accounts</button>
+    <button class="banner-button" id="journalButton" type="submit" title="Go to Journal Page">Journal Entries</button>
+    <button class="banner-button" type="submit">?</button>
   </div>
   
   <div class="container">
+    <form class="form" id="mainPage">
     <h2>Main Content</h2>
     <p>This is the main content of your webpage contained within a container.</p>
     <p>Content Goes Here</p>
+    
+  </form>
+  <form class="form form--hidden" id="tableForm">
+    <table>
+      <thead>
+        <tr>
+          <th>SL</th>
+          <th>UserName</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Cred</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody id="userTableBody"></tbody>
+    </table>
+    <button class="form__button" id="createUsers" type="submit" title="Create a New User">Create New User</button>
+  </form>
+
+  <form class="form form--hidden" id="viewLedgerPage">
+    <h1 class="form__title" id="ledgerAccount"></h1>
+    <div class="form__input-group">
+      <input type="text" id="searchLedgerInput" class="form__input" placeholder="Search Ledger by Journal ID or Balance">
+      <button id="searchLedgerButton" class="form__button" type="button">Search</button>
+      <div class="form__input--error-message"></div>
+    </div>
+
+    
+  
+
+    <table>
+      <thead>
+        <tr>
+          <th>Journal Entry ID</th>
+          <th>Entry Date</th>
+          <th>Debit</th>
+          <th>Credit</th>
+          <th>Balance At Approval</th>
+          <th>Description</th>
+          <th>Post Reference</th>
+        </tr>
+      </thead>
+
+      <tbody id="LedgerTableBody"></tbody>
+    </table>
+
+    <div class="form__input-group">
+      <label for="startDate">Start Date:</label>
+      <input type="date" id="startDate" class="form__input">
+    </div>
+  
+    <div class="form__input-group">
+      <label for="endDate">End Date:</label>
+      <input type="date" id="endDate" class="form__input">
+    </div>
+  
+    <button id="filterLedgerButton" class="form__button" type="button">Filter by Date</button>
+
+  </form>
+
+  <form class="form form--hidden" id="journalPage">
+    <button class="form__button" id="createJournalButton" type="button" title="Create Entries">Create Entries</button>
+    <h1>Approved Entries</h1>
+    <div class="form__input-group">
+      <input type="text" id="searchJournalsInput" class="form__input" placeholder="Search Journals by Account Name">
+    <div class="form__input--error-message"></div>
+    </div>
+  
+      
+      <button class="form__button" id="searchJournalsButton" type="button" title="Search Journals">Search Journal</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Journal ID</th>
+          <th>Journal Entry Date</th>
+          <th>Accounts</th>
+          <th>debit</th>
+          <th>credit</th>
+          <th>status</th>
+          <th>Approved By</th>
+          <th>Description</th>
+          <th>actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="JournalTableBody"></tbody>
+    </table>
+
+    <div id="statusFilter">
+      <label>
+        <input type="radio" name="status" value="all" checked>
+        All
+      </label>
+      <label>
+        <input type="radio" name="status" value="waiting"> Waiting for Approval
+      </label>
+      <label>
+        <input type="radio" name="status" value="approved"> Approved
+      </label>
+      <label>
+        <input type="radio" name="status" value="rejected"> Rejected
+      </label>
+    </div>
+
+  </form>
+
+  <form class="form form--hidden" id="createJournal">
+    <table>
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Debit</th>
+          <th>Credit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="text" name="account[]" required></td>
+          <td><input type="number" name="debit[]" required></td>
+          <td><input type="number" name="credit[]" required></td>
+        </tr>
+        <tr>
+          <td><input type="text" name="account[]" required></td>
+          <td><input type="number" name="debit[]" required></td>
+          <td><input type="number" name="credit[]" required></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="form__input-group">
+      <input type="text" id="journalDescription" class="form__input" autofocus placeholder="Discription">
+      <div class="form__input--error-message"></div>
+    </div>
+    <input type="file" id="fileInput" accept=".pdf, .csv, .docx, .jpg, .png, .xlsx" />
+    <button type="button" id="addRow">Add Row</button>
+    <button type="button" id="clearForm">Clear</button>
+    <button type="submitJournalEntry">Submit</button>
+  </form>
+
+  <form class="form form--hidden" id="viewJournalEntry">
+    <h1 class="form__title">Journal Entry</h1>
+    
+    <table id="entryTableValue">
+      <thead>
+        <tr>
+          <th>Information</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Entry ID</td>
+          <td id="viewJounralEntryID"></td>
+        </tr>
+        <tr>
+          <td>date</td>
+          <td id="viewJounralEntryDate"></td>
+        </tr>
+        <tr>
+          <td>Status</td>
+          <td id="viewJournalEntryStatus"></td>
+        </tr>
+        <tr>
+          <td>Approved by</td>
+          <td id="viewJournalUserID"></td>
+        </tr>
+        <tr>
+          <td>Description</td>
+          <td id="viewJournalDescription"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table id="entryTableAccounts">
+      <thead>
+        <tr>
+          <th>Accounts</th>
+          <th>Debit</th>
+          <th>Credit</th>
+        </tr>
+      </thead>
+
+      <tbody id="entryTableAccountsBody"></tbody>
+
+    </table>
+    <button class="form__button" id="entryApprove" type="button" title="Approve the Entry">Approve</button>
+    <div>
+      <input type="text" id="rejectReason" class="form__input" autofocus placeholder="Reason for Rejection">
+      <div class="form__input--error-message"></div>
+    </div>
+    <button class="form__button" id="entryReject" type="button" title="Reject the Entry">reject</button>
+    <a id="downloadLink" href="#" style="display: none" download>Download File</a>
+  </form>
+
+  <form class="form form--hidden" id="accountTableForm">
+    <div class="form__input-group">
+      <input type="text" id="searchAccounts" class="form__input" autofocus placeholder="Search">
+    <div class="form__input--error-message"></div>
+
+    
+    <button class="form__button" id="searchAccountsButton" type="submit" title="Search Accounts using Account Number or Name">Search Account</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Account Number</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Sub-Category</th>
+          <th>Balance</th>
+          <th>Date Added</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="accountTableBody"></tbody>
+    </table>
+
+    
+  </form>
+
+  <form class="form form--hidden" id="searchedAccountTable">
+    <h1 class="form__title">Event Log</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Account Number</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Sub-Category</th>
+          <th>Balance</th>
+          <th>Date Added</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="searchedAccountTableBody"></tbody>
+    </table>
+  </form>
+  
+  <form class="form form--hidden" id="eventLogTableForm">
+    <h1 class="form__title" id="eventLogAccount"></h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Event Id</th>
+          <th>Data Change</th>
+          <th>UserId</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="eventLogTableBody"></tbody>
+    </table>
+  </form>
+
+  <form class="form form--hidden" id="createNewAccountForm">
+    <h1 class="form__title">Create New Account</h1>
+    <div class="form__message form__message--error"></div>
+    <div class="form__input-group">
+      <input type="text" id="accountName" class="form__input" autofocus placeholder="Account Name">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="category" class="form__input" autofocus placeholder="Category">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="subCategory" class="form__input" autofocus placeholder="Sub-Category">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="normalSide" class="form__input" autofocus placeholder="Normal Side">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="initialBalance" class="form__input" autofocus placeholder="Initial Balance">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="debit" class="form__input" autofocus placeholder="Debit">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="credit" class="form__input" autofocus placeholder="Credit">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="order" class="form__input" autofocus placeholder="Order">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="statement" class="form__input" autofocus placeholder="Statement">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="comment" class="form__input" autofocus placeholder="Comment">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="description" class="form__input" autofocus placeholder="Description">
+      <div class="form__input--error-message"></div>
+    </div>
+    
+    <button class="form__button" id="CreateAccountsButton" title="Create a New Finance Account">Create Account</button>
+  </form>
+
+  <form class="form form--hidden" id="viewAccountForm">
+    <h1 class="form__title">View Account</h1>
+    
+    <table id="accountTable">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Account Number</td>
+          <td id="viewAccountNumber"></td>
+        </tr>
+        <tr>
+          <td>Account Name</td>
+          <td id="viewAccountName"></td>
+        </tr>
+        <tr>
+          <td>Category</td>
+          <td id="viewAccountCategory"></td>
+        </tr>
+        <tr>
+          <td>Subcategory</td>
+          <td id="viewAccountSubCategory"></td>
+        </tr>
+        <tr>
+          <td>Normal Side</td>
+          <td id="viewAccountNormalSide"></td>
+        </tr>
+        <tr>
+          <td>Initial Balance</td>
+          <td id="viewAccountInitialBalance"></td>
+        </tr>
+        <tr>
+          <td>Balance</td>
+          <td id="viewAccountBalance"></td>
+        </tr>
+        <tr>
+          <td>Debit</td>
+          <td id="viewAccountDebit"></td>
+        </tr>
+        <tr>
+          <td>Credit</td>
+          <td id="viewAccountCredit"></td>
+        </tr>
+        <tr>
+          <td>Order</td>
+          <td id="viewAccountOrder"></td>
+        </tr>
+        <tr>
+          <td>Statement</td>
+          <td id="viewAccountStatement"></td>
+        </tr>
+        <tr>
+          <td>Comment</td>
+          <td id="viewAccountComment"></td>
+        </tr>
+        <tr>
+          <td>Description</td>
+          <td id="viewAccountDescription"></td>
+        </tr>
+        <tr>
+          <td>UserId</td>
+          <td id="viewAccountUserId"></td>
+        </tr>
+      </tbody>
+    </table>
+    <button class="form__button" id="viewLedgerButton" title="Open Ledger Page">Open Ledger</button>
+    <button class="form__button" id="viewEventLog" title="Open Event Log Page">View Event Log</button>
+    <button class="form__button" id="emailAccountID" title="email User who created account">Email Admin</button>
+  </form>
+
+  <form class="form form--hidden" id="editAccountForm">
+    <h1 class="form__title" id="editAccountName"></h1>
+    <div class="form__message form__message--error"></div>
+    <div class="form__input-group">
+      <input type="text" id="editSubCategory" class="form__input" autofocus placeholder="Sub-Category">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="editNormalSide" class="form__input" autofocus placeholder="Normal Side">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="editOrder" class="form__input" autofocus placeholder="Order">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="editStatement" class="form__input" autofocus placeholder="Statement">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="editComment" class="form__input" autofocus placeholder="Comment">
+      <div class="form__input--error-message"></div>
+    </div>
+    <div class="form__input-group">
+      <input type="text" id="editDescription" class="form__input" autofocus placeholder="Description">
+      <div class="form__input--error-message"></div>
+    </div>
+    <button class="form__button" id="editAccountsButton" title="Update Account Information">Update Account</button>
+  </form>
+
+  
+
+  <form class="form form--hidden" id="createNewAccount">
+    <h1 class="form__title">Create New Account</h1>
+      <div class="form__message form__message--error"></div>
+      <div class="form__input-group">
+        <input type="text" id="firstName" class="form__input" autofocus placeholder="First Name">
+        <div class="form__input--error-message"></div>
+      </div>
+      <div class="form__input-group">
+        <input type="text" id="lastName" class="form__input" autofocus placeholder="Last Name">
+        <div class="form__input--error-message"></div>
+      </div>
+      <div class="form__input-group">
+        <input type="text" id="address" class="form__input" autofocus placeholder="Address">
+        <div class="form__input--error-message"></div>
+      </div>
+      <div class="form__input-group">
+        <input type="date" id="dateOfBirth" class="form__input" autofocus placeholder="Date of Birth: 2002-17-02">
+        <div class="form__input--error-message"></div>
+      </div>
+      <div class="form__input-group">
+        <input type="text" id="realEmail" class="form__input" autofocus placeholder="Email Address">
+        <div class="form__input--error-message"></div>
+      </div>
+      <div class="form__input-group">
+        <input type="password"  id="realPassword" id="password" class="form__input" autofocus placeholder="Password">
+        <div class="form__input--error-message"></div>
+      </div>
+      <div class="form__input-group">
+        <input type="text" id="authentication" class="form__input" autofocus placeholder="Authentication">
+        <div class="form__input--error-message"></div>
+      </div>
+      <button class="form__button" id="submitData" title="Create a New User Account">Create Account</button>
+      <p class="form__text">
+        <a href="#" class="form__link"></a>
+      </p>
+      <p class="form__text">
+        <a class="form__link" id="linkReturn">Cancel</a>
+      </p>
+  </form>
+  <form class="form form--hidden" id="updateAccount">
+    <h1 class="form__title">Update Account Information</h1>
+      <div class="form__message form__message--error"></div>
+      <div class="form__input-group">
+        <input type="text" id="updatefirstName" class="form__input" autofocus placeholder="First Name">
+        <div class="form__input--error-message"></div>
+      </div>
+      <div class="form__input-group">
+        <input type="text" id="updatelastName" class="form__input" autofocus placeholder="Last Name">
+        <div class="form__input--error-message"></div>
+      </div>
+      <div class="form__input-group">
+        <input type="text" id="updateaddress" class="form__input" autofocus placeholder="Address">
+        <div class="form__input--error-message"></div>
+      </div>
+      <div class="form__input-group">
+        <input type="date" id="updatedateOfBirth" class="form__input" autofocus placeholder="Date of Birth: 2002-17-02">
+        <div class="form__input--error-message"></div>
+      </div>
+      <div class="form__input-group">
+        <input type="text" id="updaterealEmail" class="form__input" autofocus placeholder="Email Address">
+        <div class="form__input--error-message"></div>
+      </div>
+      <div class="form__input-group">
+        <input type="password"  id="updaterealPassword" id="password" class="form__input" autofocus placeholder="Password">
+        <div class="form__input--error-message"></div>
+      </div>
+      <div class="form__input-group">
+        <input type="text" id="updateauthentication" class="form__input" autofocus placeholder="Authentication">
+        <div class="form__input--error-message"></div>
+      </div>
+      <button class="form__button" id="updateData" title="Update User Account Information">Update Account</button>
+      <button class="form__button" id="activateUser" title="Activate or Deactivate User Account"></button>
+      <button class="form__button" id="emailUser" title="Send Email to User Account Email">Send Email to User</button>
+      <p class="form__text">
+        <a href="#" class="form__link"></a>
+      </p>
+      <p class="form__text">
+        <a class="form__link" id="linkReturnUpdate">Cancel</a>
+      </p>
+  </form>
+  <form class="form form--hidden" id="email">
+    <div class="field">
+      <label for="frname">subject</label>
+      <input type="text" name="subject" id="subject">
+    </div>
+    <div class="field">
+      <label for="message">message</label>
+      <input type="text" name="message" id="message">
+    </div>
+    
+  
+    <button class="form__button" id="sendEmailButton" title="Send Email">Send Email</button>
+  </form>
   </div>
+  <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function () {
+      emailjs.init("Do1B22pVrG5JOMZyR"); // Replace with your EmailJS user ID
+    })();
+  </script>
+  
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+
 
   <script type="module">
 
+   
+
+
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-  import { getDatabase, set, ref, update, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+  import { getDatabase, set, ref, update, get, remove, runTransaction } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL} from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js';
   const firebaseConfig = {
           apiKey: "AIzaSyCjKjeEiIpaLybLGQzoPlnGp1D6XYuh8Lw",
           authDomain: "swe4713temp.firebaseapp.com",
@@ -32,54 +559,2336 @@
           storageBucket: "swe4713temp.appspot.com",
           messagingSenderId: "1067050664646",
           appId: "1:1067050664646:web:c07f85156618fcbb59cdc7",
+          storageBucket: "swe4713temp.appspot.com",
           measurementId: "G-7L55RX7DM3"
         };
 
     // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase();  // Initialize the Firebase database
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase();
 
-  async function getUserData(uid) {
-    const userRef = ref(database, 'users/' + uid);
-    const snapshot = await get(userRef);
-    if (snapshot.exists()) {
-      const userData = snapshot.val();
-      return userData.username;
+    const auth = getAuth(app);
+
+    const storage = getStorage(app);
+    
+    //when selected user gets stored to update for later
+    let selectedUserId = null;
+
+    
+
+    
+
+    
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const mainForm = document.querySelector("#mainPage");
+        const createNewAccountForm = document.querySelector("#createNewAccount");
+        const updateAccountForm = document.querySelector("#updateAccount");
+        const emailForm = document.querySelector("#email");
+        const tableForm = document.querySelector("#tableForm");
+        const accountTableForm = document.querySelector("#accountTableForm");
+        const createNewAccountsForm = document.querySelector("#createNewAccountForm");
+        const searchedAccountTableForm = document.querySelector('#searchedAccountTable');
+        const editAccountForm = document.querySelector("#editAccountForm");
+        const viewAccountForm = document.querySelector("#viewAccountForm");
+        const eventLogTableForm = document.querySelector('#eventLogTableForm');
+        const createJournalForm = document.querySelector('#createJournal');
+        const journalPageFrom = document.querySelector('#journalPage');
+        const viewJournalEntryForm = document.querySelector('#viewJournalEntry');
+        const viewLedgerPageForm = document.querySelector('#viewLedgerPage');
+
+    
+        //on click hides hides create new account and unhides mainpage
+        document.querySelector("#linkReturn").addEventListener("click", e => {
+            e.preventDefault();
+            createNewAccountForm.classList.add("form--hidden");
+            tableForm.classList.remove("form--hidden");
+            updateAccountForm.add("form--hidden");
+        });
+
+        /*document.querySelector("#userButton").addEventListener("click", e => {
+          e.preventDefault();
+          mainForm.classList.add("form--hidden");
+          tableForm.classList.remove("form--hidden");
+          accountTableForm.classList.add("form--hidden");
+          searchedAccountTableForm.classList.add("form--hidden");
+          viewAccountForm.classList.add("form--hidden");
+          eventLogTableForm.classList.add("form--hidden");
+        });*/
+
+        document.querySelector("#dashboardButton").addEventListener("click", e => {
+          e.preventDefault();
+          mainForm.classList.remove("form--hidden");
+          tableForm.classList.add("form--hidden");
+          createNewAccountForm.classList.add("form--hidden");
+          updateAccountForm.classList.add("form--hidden");
+          emailForm.classList.add("form--hidden");
+          accountTableForm.classList.add("form--hidden");
+          searchedAccountTableForm.classList.add("form--hidden");
+          editAccountForm.classList.add("form--hidden");
+          viewAccountForm.classList.add("form--hidden");
+          eventLogTableForm.classList.add("form--hidden");
+          journalPageFrom.classList.add("form--hidden");
+          createJournalForm.classList.add("form--hidden");
+          viewJournalEntryForm.classList.add("form--hidden");
+          viewLedgerPageForm.classList.add("form--hidden");
+        });
+
+        document.querySelector("#accountsButton").addEventListener("click", e => {
+          e.preventDefault();
+          mainForm.classList.add("form--hidden");
+          tableForm.classList.add("form--hidden");
+          createNewAccountForm.classList.add("form--hidden");
+          updateAccountForm.classList.add("form--hidden");
+          emailForm.classList.add("form--hidden");
+          createNewAccountsForm.classList.add("form--hidden");
+          accountTableForm.classList.remove("form--hidden");
+          searchedAccountTableForm.classList.add("form--hidden");
+          editAccountForm.classList.add("form--hidden");
+          viewAccountForm.classList.add("form--hidden");
+          eventLogTableForm.classList.add("form--hidden");
+          journalPageFrom.classList.add("form--hidden");
+          createJournalForm.classList.add("form--hidden");
+          viewJournalEntryForm.classList.add("form--hidden");
+          viewLedgerPageForm.classList.add("form--hidden");
+        });
+
+        document.querySelector("#journalButton").addEventListener("click", e => {
+          e.preventDefault();
+          mainForm.classList.add("form--hidden");
+          tableForm.classList.add("form--hidden");
+          createNewAccountForm.classList.add("form--hidden");
+          updateAccountForm.classList.add("form--hidden");
+          emailForm.classList.add("form--hidden");
+          createNewAccountsForm.classList.add("form--hidden");
+          accountTableForm.classList.add("form--hidden");
+          searchedAccountTableForm.classList.add("form--hidden");
+          editAccountForm.classList.add("form--hidden");
+          viewAccountForm.classList.add("form--hidden");
+          eventLogTableForm.classList.add("form--hidden");
+          journalPageFrom.classList.remove("form--hidden");
+          createJournalForm.classList.add("form--hidden");
+          viewJournalEntryForm.classList.add("form--hidden");
+          viewLedgerPageForm.classList.add("form--hidden");
+        });
+
+        
+        document.querySelector("#createUsers").addEventListener("click", e => {
+            e.preventDefault();
+            createNewAccountForm.classList.remove("form--hidden");
+            mainForm.classList.add("form--hidden");
+            tableForm.classList.add("form--hidden");
+        });
+
+
+        document.getElementById("linkReturnUpdate").addEventListener("click", e => {
+            e.preventDefault();
+            updateAccountForm.classList.add("form--hidden");
+            tableForm.classList.remove("form--hidden");
+        });
+
+        document.getElementById("emailUser").addEventListener("click", e => {
+          e.preventDefault();
+          updateAccountForm.classList.add("form--hidden");
+          emailForm.classList.remove("form--hidden");
+        })
+
+        document.getElementById('viewLedgerButton').addEventListener('click', e => {
+          e.preventDefault();
+        });
+
+        document.getElementById('viewEventLog').addEventListener('click', e => {
+          e.preventDefault();
+        });
+
+        document.getElementById("submitData").addEventListener('click', e => {
+            e.preventDefault();
+        });
+
+        document.querySelector('#CreateAccountsButton').addEventListener('click', (e) => {
+        e.preventDefault(); 
+        });
+
+        document.querySelector('#searchAccountsButton').addEventListener('click', (e) => {
+        e.preventDefault(); 
+        
+        });
+
+        document.querySelector('#editAccountsButton').addEventListener('click', (e) => {
+          e.preventDefault();
+        });
+
+        document.getElementById('updateData').addEventListener('click', (e) => {
+          e.preventDefault();
+        });
+
+        
+        document.querySelector("#createJournalButton").addEventListener("click", e => {
+            e.preventDefault();
+            createJournalForm.classList.remove("form--hidden");
+            journalPageFrom.classList.add("form--hidden");
+        });
+        
+
+        
+    });
+
+
+    document.querySelectorAll(".form__input").forEach(inputElement => {
+            inputElement.addEventListener("blur", e => {
+                if (e.target.id === "realPassword" && e.target.value.length > 0 && e.target.value.length < 8) {
+                    setInputError(inputElement, "Password must be at least 8 characters in length");
+                } else if (e.target.id === "realPassword" && hasValue(e.target.value) === false) {
+                    setInputError(inputElement, "Password must contain at least one number, one letter, and one special character");
+                }
+            });
+            
+            inputElement.addEventListener("input", e => {
+                clearInputError(inputElement);
+            });
+        });
+
+
+        function updateFormWithData(user) {
+          // Update the form fields with the user's data
+          
+          document.getElementById('updatefirstName').value = user.firstName;
+          document.getElementById('updatelastName').value = user.lastName;
+          document.getElementById('updateaddress').value = user.address;
+          document.getElementById('updatedateOfBirth').value = user.dateOfBirth;
+          document.getElementById('updaterealEmail').value = user.email;
+          document.getElementById('updaterealPassword').value = user.password;
+
+          if(user.cred === 0){
+            document.getElementById('updateauthentication').value = 'user';
+          }else if(user.cred === 1){
+            document.getElementById('updateauthentication').value = 'manager';
+          } else if(user.cred === 2){
+            document.getElementById('updateauthentication').value = 'admin';
+          }else {
+            document.getElementById('updateauthentication').value = user.cred;
+          }
+        }
+
+        async function updateAccountFromData(accountRef) {
+          const accountSnapshot = await get(accountRef);
+           if (accountSnapshot.exists()) {
+              const account = accountSnapshot.val();
+              console.log('Account data:', account);
+
+               // Update form fields with account data
+              document.getElementById('editSubCategory').value = account.subCategory;
+             document.getElementById('editNormalSide').value = account.normalSide;
+              document.getElementById('editOrder').value = account.order;
+              document.getElementById('editStatement').value = account.statement;
+              document.getElementById('editComment').value = account.comment;
+              document.getElementById('editDescription').value = account.description;
+              document.getElementById('editAccountName').textContent = account.accountName;
+
+            } else {
+              console.log('Account not found.');
+            }
+        }
+
+        function displayAccountInfo(account) {
+          document.getElementById('viewAccountNumber').innerText = `Account Number: ${account.accountNumber}`;
+          document.getElementById('viewAccountName').innerText = `Account Name: ${account.accountName}`;
+          document.getElementById('viewAccountCategory').innerText = `Category: ${account.category}`;
+          document.getElementById('viewAccountSubCategory').innerText = `Subcategory: ${account.subCategory}`;
+          document.getElementById('viewAccountNormalSide').innerText = `Normal Side: ${account.normalSide}`;
+          document.getElementById('viewAccountInitialBalance').innerText = `Initial Balance: $${formatMonetaryValue(account.initialBalance)}`;
+          document.getElementById('viewAccountBalance').innerText = `Balance: $${formatMonetaryValue(account.balance)}`;
+          document.getElementById('viewAccountDebit').innerText = `Debit: $${formatMonetaryValue(account.debit)}`;
+          document.getElementById('viewAccountCredit').innerText = `Credit: $${formatMonetaryValue(account.credit)}`;
+          document.getElementById('viewAccountOrder').innerText = `Order: ${account.order}`;
+          document.getElementById('viewAccountStatement').innerText = `Statement: ${account.statement}`;
+           document.getElementById('viewAccountComment').innerText = `Comment: ${account.comment}`;
+          document.getElementById('viewAccountDescription').innerText = `Description: ${account.description}`;
+          document.getElementById('viewAccountUserId').innerText = `User ID: ${account.userId}`;
+        }
+
+        //-------------------------------------------------------------------------------------------------------
+        //journal entries for manager
+        const form = document.getElementById('createJournal');
+        const addRowButton = document.getElementById('addRow');
+        const submitButton = form.querySelector('button[type="submitJournalEntry"]');
+        const tbody = form.querySelector('tbody');
+        const clearButton = document.getElementById('clearForm');
+
+        // Function to add a new row to the table
+        function addRow() {
+          const newRow = document.createElement('tr');
+          newRow.innerHTML = `
+            <td><input type="text" name="account[]" required></td>
+            <td><input type="number" name="debit[]" required></td>
+            <td><input type="number" name="credit[]" required></td>
+          `;
+            tbody.appendChild(newRow);
+        }
+        addRowButton.addEventListener('click', addRow);
+
+        function clearForm() {
+          form.reset(); // This will reset the form, clearing all data in the table
+        }
+
+        clearButton.addEventListener('click', clearForm);
+
+
+
+        //adding to database
+        // Function to submit a journal entry to the database
+        async function submitJournalEntry(event) {
+  event.preventDefault(); // Prevent the default form submission behavior
+
+
+  //--------------------------------------------------------------------------
+  const fileInput = document.getElementById('fileInput');
+  const file = fileInput.files[0];
+  //--------------------------------------------------------------------------
+
+  var journalDescription = document.getElementById('journalDescription').value;
+
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+
+  let totalCredit = 0;
+  let totalDebit = 0;
+  let encounteredNonZeroCredit = false; // Flag to track non-zero credits
+
+  // Get the current date and time
+  const currentDate = new Date().toISOString();
+
+  // Generate a unique ID using a timestamp
+  const uniqueId = Date.now().toString(); // You can use another method to generate a unique ID if needed
+
+  const journalData = {};
+
+  // Create an object to store account updates
+  const accountUpdates = {};
+
+  // Iterate through the rows in their original order and collect the data
+  for (let index = 0; index < rows.length; index++) {
+    const row = rows[index];
+    const account = row.querySelector('input[name="account[]"]').value;
+    const credit = parseFloat(row.querySelector('input[name="credit[]"]').value);
+    const debit = parseFloat(row.querySelector('input[name="debit[]"]').value);
+
+    if (credit !== 0) {
+      encounteredNonZeroCredit = true;
+    }
+
+    if (encounteredNonZeroCredit && credit === 0) {
+      alert('You cannot have a zero credit entry after a non-zero credit entry.');
+      return; // Exit the function without submitting to the database
+    }
+
+    // Check if the entered account name exists in the accounts database
+    const accountSnapshot = await get(ref(database, 'accounts/' + account));
+    if (accountSnapshot.exists()) {
+      if (!journalData[account]) {
+        journalData[account] = {
+          credit: 0,
+          debit: 0,
+        };
+      }
+
+      journalData[account].credit += credit;
+      journalData[account].debit += debit;
+
+      // Update the account updates object
+      if (!accountUpdates[account]) {
+        accountUpdates[account] = {
+          credit: 0,
+          debit: 0,
+        };
+      }
+      accountUpdates[account].credit += credit;
+      accountUpdates[account].debit += debit;
+
+      // Calculate the total credit and debit
+      totalCredit += credit;
+      totalDebit += debit;
     } else {
+      alert(`Account "${account}" does not exist.`);
+      return; // Exit the function without submitting to the database
+    }
+  }
+
+  // Check if total credit equals total debit
+  if (totalCredit !== totalDebit) {
+    alert('Total credit does not equal total debit. Please balance the entries.');
+    return; // Exit the function without submitting to the database
+  }
+
+  var userIDHolder = getDataFromQuery();
+  if (!userIDHolder) {
+    userIDHolder = "empty";
+  }
+
+  if (!journalDescription) {
+    journalDescription = "No Description";
+  }
+
+  // Add the date and permission value (2) to the journalData object
+  journalData['date'] = currentDate;
+  journalData['permission'] = 1;
+  journalData['approval'] = userIDHolder;
+  journalData['description'] = journalDescription;
+
+  // Create a reference to the "journalentries" with the unique ID
+  const newEntryRef = ref(database, `journalentries/${uniqueId}`);
+
+  if (file) {
+     // Construct the storage path
+     const storagePath = `journal/${uniqueId}/savedfile/entryFile`;
+
+    // Upload the file to Firebase Storage
+    const filestorageRef = storageRef(storage, storagePath);
+    const uploadTask = uploadBytes(filestorageRef, file);
+
+
+
+    uploadTask.then(() => {
+      // The file has been successfully uploaded
+      console.log('File uploaded to:', storagePath);
+
+      
+      // Now, you can continue with your other data submission logic.
+      // You may want to store the `storagePath` in your database to link it to the journal entry.
+
+      // Continue with your data submission logic here...
+    }).catch((error) => {
+      // Handle the file upload error
+      console.error('Error uploading file:', error);
+    });
+  }
+
+  const emailParams = {
+            to_email: 'robertsoncaden02@gmail.com',  // Replace with the recipient's email address
+            subject: 'New Journal Entry',  // Replace with the desired subject
+            message: 'A new Journal is waiting for approval. Please Review and accept or deny it.' // Replace with the desired email content
+         };
+
+
+
+  // Store the entire journal data under the unique ID
+  set(newEntryRef, journalData)
+    .then(async () => {
+      alert('Journal entry submitted successfully.');
+
+      //send email to manager
+
+      emailjs.send('service_uhjncdn', 'template_57xcxk7', emailParams)
+           .then((response) => {
+             alert('Email sent successfully!', response);
+            })
+            .catch((error) => {
+              alert('Error sending email:', error);
+            });
+        
+
+
+
+
+      // Update the accounts in the database
+      await updateAccounts(accountUpdates, uniqueId,journalData['date'], journalData['description']);
+
+      form.reset();
+    })
+    .catch((error) => {
+      alert('Error submitting journal entry:', error);
+    });
+}
+
+
+
+async function updateAccounts(accountUpdates, uniqueID, date, description) {
+  for (const accountName in accountUpdates) {
+    const updates = accountUpdates[accountName];
+
+    let uniqueIDTemp = uniqueID;
+    let dateTemp = date;
+    let descriptionTemp = description;
+
+    const accountRef = ref(database, `accounts/${accountName}`);
+
+    await runTransaction(accountRef, (accountData) => {
+      if (!accountData) {
+        return accountData;
+      }
+
+      // Increment the credit and debit values
+      accountData.credit += updates.credit;
+      accountData.debit += updates.debit;
+
+      // Update the balance
+      accountData.balance = accountData.debit - accountData.credit;
+
+      return accountData;
+    });
+
+    // Add an event log to each updated account
+    await addAccountEventLog(accountName, updates, uniqueIDTemp, dateTemp, descriptionTemp);
+  }
+}
+
+async function addAccountEventLog(accountName, updates, journalEntryId, journalEntryDate, description) {
+  try {
+    const accountRef = ref(database, `accounts/${accountName}`);
+    const accountSnapshot = await get(accountRef);
+
+    if (!accountSnapshot.exists()) {
+      console.error(`Account "${accountName}" not found.`);
+      return;
+    }
+
+    const accountData = accountSnapshot.val();
+
+    const eventCountRef = ref(database, `accounts/${accountName}/logs/eventCount`);
+    const eventCountSnapshot = await get(eventCountRef);
+    const currentEventId = eventCountSnapshot.val() || 0;
+
+    // Increment the event count
+    const newEventCount = currentEventId + 1;
+    await set(eventCountRef, newEventCount);
+
+    let userIDtemp = getDataFromQuery(); // Declare as let, allowing reassignment
+    if (!userIDtemp) {
+      userIDtemp = "empty";
+    }
+
+    // Create event data object with the entire updated account data
+    const eventData = {
+      eventId: newEventCount,
+      userId: userIDtemp,
+      dateTime: new Date().toISOString(),
+      accountDataChanges: {
+        accountName: accountName,
+        accountNumber: accountData.accountNumber,
+        balance: accountData.balance,
+        category: accountData.category,
+        comment: accountData.comment,
+        credit: accountData.credit,
+        date: accountData.date,
+        debit: accountData.debit,
+        description: accountData.description,
+        initialBalance: accountData.initialBalance,
+        normalSide: accountData.normalSide,
+        order: accountData.order,
+        statement: accountData.statement,
+        subCategory: accountData.subCategory || '', // Default value if subcategory is not defined
+      },
+    };
+
+    // Add the event data to logs
+    await set(ref(database, `accounts/${accountName}/logs/events/${newEventCount}`), eventData);
+
+    // Add the entry to the account ledger
+    const ledgerEntry = {
+      journalEntryId: journalEntryId,
+      entryDate: journalEntryDate,
+      debit: updates.debit,
+      credit: updates.credit,
+      balance: accountData.balance, // Balance after the entry
+      description: description,
+    };
+
+    // Generate a unique key manually using a timestamp
+const uniqueKey = Date.now().toString(); // You can use another method to generate a unique key
+
+// Create a reference to the ledger under the specific account with the manually generated key
+const ledgerRef = ref(database, `accounts/${accountName}/ledger/${uniqueKey}`);
+
+
+
+    // Store the ledger entry under the unique ID
+    await set(ledgerRef, ledgerEntry);
+
+    alert('Account updated successfully');
+  } catch (error) {
+    console.error('Error updating account:', error);
+    alert('Error updating account. Please try again.');
+  }
+}
+
+
+submitButton.addEventListener('click', submitJournalEntry);
+//--------------------------------------------------------------------------------------------------------
+//journal table
+// Function to fetch and display journal entries
+async function displayJournalEntries() {
+  const tableBody = document.getElementById('JournalTableBody');
+  tableBody.innerHTML = ''; // Clear the existing table rows
+
+  // Retrieve the journal entries from the database
+  const journalEntriesRef = ref(database, 'journalentries');
+  const journalEntriesSnapshot = await get(journalEntriesRef);
+
+  if (journalEntriesSnapshot.exists()) {
+    const journalEntries = journalEntriesSnapshot.val();
+
+    // Iterate through the journal entries and create table rows
+    Object.keys(journalEntries).forEach((entryId) => {
+      const entry = journalEntries[entryId];
+      
+      const permissionType = entry.permission;
+      var permissionValue;
+
+      if (permissionType === 1){
+        permissionValue = "Waiting for Approval";
+      } else if (permissionType === 0){
+        permissionValue = "rejected";
+      } else {
+        permissionValue = "approved";
+      }
+      
+      const row = document.createElement('tr'); // Define the row here
+
+      row.innerHTML = `
+        <td>${entryId}</td>
+        <td>${entry.date}</td>
+        <td>${getAccountNames(entry)}</td>
+        <td>$${formatMonetaryValue(getAccountTotal(entry, 'debit'))}</td>
+        <td>$${formatMonetaryValue(getAccountTotal(entry, 'credit'))}</td>
+        <td>${permissionValue}</td>
+        <td>${entry.approval}</td>
+        <td>${entry.description}</td>
+        <td><button class="journalviewButton" type="button" data-entry-id="${entryId}">View</button></td>
+      `;
+
+      // Add an event listener to the "View" button
+      const viewButton = row.querySelector('.journalviewButton');
+      viewButton.addEventListener('click', () => {
+        viewJournalEntry(entryId); // Call a function to display the entry when the button is clicked
+      });
+
+      tableBody.appendChild(row);
+    });
+  } else {
+    // Handle the case where no journal entries exist
+    tableBody.innerHTML = '<tr><td colspan="8">No journal entries found.</td></tr>';
+  }
+}
+
+// Helper function to get account names separated by commas
+function getAccountNames(entry) {
+  return Object.keys(entry)
+    .filter(key => key !== 'date' && key !== 'permission' && key !== 'approval' && key !== 'description')
+    .join(', ');
+}
+
+// Helper function to get the total credit or debit for a specific account
+function getAccountTotal(entry, accountType) {
+  let total = 0;
+  Object.keys(entry).forEach((key) => {
+    if (key !== 'date' && key !== 'permission' && key !== 'approval' && key !== 'description') {
+      // Check if the account has a credit or debit property
+      if (entry[key][accountType]) {
+        total += entry[key][accountType];
+      }
+    }
+  })
+  return total;
+}
+
+
+
+
+// Call the function to initially display journal entries
+displayJournalEntries();
+
+
+//---------------------------------------------------------------------------------------------------------
+//Create View form
+
+
+
+function viewJournalEntry(entryId) {
+
+  // Create a Set to keep track of the accounts processed
+  const processedAccounts = new Set();
+  
+  // Fetch the data associated with the unique ID from the database
+  const entryRef = ref(database, `journalentries/${entryId}`);
+  let entryIDTemp = entryId;
+  get(entryRef)
+    .then((entrySnapshot) => {
+      if (entrySnapshot.exists()) {
+        const entryData = entrySnapshot.val();
+
+         // Add the entry to the account ledger
+         const journalEntryDate = entryData.date; // Use the date from the entry data
+        const description = entryData.description;
+
+       
+        const storagePath = `journal/${entryId}/savedfile/entryFile`; 
+          const downloadLink = document.getElementById('downloadLink');
+
+          const fileRef = storageRef(storage, storagePath);
+// Get the download URL for the file
+getDownloadURL(fileRef)
+      .then((downloadURL) => {
+        // Update the href attribute of the download link
+        downloadLink.href = downloadURL;
+
+        // Show the download link
+        downloadLink.style.display = 'block';
+      })
+      .catch((error) => {
+        console.error('Error getting download URL:', error);
+      });
+
+        const permissionType = entryData.permission;
+        var permissionValue;
+
+        if (permissionType === 1) {
+          permissionValue = "Waiting for Approval";
+          // Show the "Approve" button
+          document.getElementById('entryApprove').style.display = 'none';
+          // Show the "Reject" button
+          document.getElementById('entryReject').style.display = 'none';
+
+          // Show the "Reject Reason" input field
+          document.getElementById('rejectReason').style.display = 'none';
+        } else if (permissionType === 0) {
+          permissionValue = "Rejected";
+          // Hide the "Approve" and "Reject" buttons
+          document.getElementById('entryApprove').style.display = 'none';
+          document.getElementById('entryReject').style.display = 'none';
+
+          // Hide the "Reject Reason" input field
+          document.getElementById('rejectReason').style.display = 'none';
+        } else {
+          permissionValue = "Approved";
+          // Hide the "Approve" and "Reject" buttons
+          document.getElementById('entryApprove').style.display = 'none';
+          document.getElementById('entryReject').style.display = 'none';
+
+          // Hide the "Reject Reason" input field
+          document.getElementById('rejectReason').style.display = 'none';
+        }
+
+        
+
+
+
+        // Populate the viewJournalEntry form with the data
+        document.getElementById('viewJounralEntryID').textContent = entryId;
+        document.getElementById('viewJounralEntryDate').textContent = entryData.date;
+        document.getElementById('viewJournalEntryStatus').textContent = permissionValue;
+        document.getElementById('viewJournalUserID').textContent = entryData.approval;
+        document.getElementById('viewJournalDescription').textContent = entryData.description;
+
+        // Populate the accounts table in the form with account data
+        const entryTableAccountsBody = document.getElementById('entryTableAccountsBody');
+        entryTableAccountsBody.innerHTML = ''; // Clear existing rows
+
+        // Iterate through the accounts and display them in the table
+        for (const account in entryData) {
+          if (account !== 'date' && account !== 'permission' && account !== 'approval' && account !== 'description') {
+            const accountRow = document.createElement('tr');
+            accountRow.innerHTML = `
+              <td>${account}</td>
+              <td>${entryData[account].debit || ''}</td>
+              <td>${entryData[account].credit || ''}</td>
+            `;
+            entryTableAccountsBody.appendChild(accountRow);
+          }
+        }
+
+        // Show the viewJournalEntry form
+        const viewJournalEntryForm = document.getElementById('viewJournalEntry');
+        const journalPageForm = document.getElementById('journalPage');
+        const viewLedgerPageForm = document.getElementById('viewLedgerPage');
+        viewJournalEntryForm.classList.remove('form--hidden');
+        viewLedgerPageForm.classList.add('form--hidden');
+        journalPageForm.classList.add('form--hidden');
+      } else {
+        console.error(`Journal entry with ID ${entryId} not found.`);
+      }
+    })
+    .catch((error) => {
+      console.error('Error fetching journal entry:', error);
+    });
+}
+
+async function handleApproval(entryData, entryRef, entryId, journalEntryDate, description) {
+  // Create a copy of entryData to avoid modifying the original object
+  const updatedEntryData = { ...entryData };
+  // Change permissionType to 2 (approved)
+  updatedEntryData.permission = 2;
+
+  // Update the entry data in the database with the updated copy
+  await set(entryRef, updatedEntryData);
+
+  // Add the entry data to the event logs of the associated accounts
+  for (const account in updatedEntryData) {
+    if (account !== 'date' && account !== 'permission' && account !== 'approval' && account !== 'description') {
+      const updates = updatedEntryData[account];
+
+      // Check if the account has already been processed in this loop
+      await addAccountEventLog(account, updates, entryId, journalEntryDate, description);
+
+      // Update account balances
+      const accountRef = ref(database, `accounts/${account}`);
+      const accountSnapshot = await get(accountRef);
+      if (accountSnapshot.exists()) {
+        const accountData = accountSnapshot.val();
+
+        // Update account balance based on credit and debit
+        if (updates.credit) {
+          accountData.balance += updates.credit;
+          accountData.credit += updates.credit;
+        }
+        if (updates.debit) {
+          accountData.balance -= updates.debit;
+          accountData.debit += updates.debit;
+        }
+
+        // Update the account data in the database
+        await set(accountRef, accountData);
+      }
+    }
+  }
+
+  console.log('test');
+
+  // Alert the user
+  //alert('Entry approved and added to account event logs');
+
+  // Refresh the displayed journal entries (if needed)
+  filterAndDisplayJournalEntries('all'); // You may want to refresh the entries based on the selected filter
+}
+
+const approveButton = document.getElementById('entryApprove');
+approveButton.addEventListener('click', async () => {
+  const entryId = document.getElementById('viewJounralEntryID').textContent;
+  const entryRef = ref(database, `journalentries/${entryId}`);
+  // Pass additional parameters here if needed
+  get(entryRef)
+    .then((entrySnapshot) => {
+      if (entrySnapshot.exists()) {
+        const entryData = entrySnapshot.val();
+        // Pass additional parameters here if needed
+        handleApproval(entryData, entryRef, entryId, entryData.date, description);
+      }
+    })
+    .catch((error) => {
+      console.error('Error fetching journal entry:', error);
+    });
+});
+
+
+// Add an event listener to the "entryReject" button
+// Add an event listener to the "entryReject" button
+const rejectButton = document.getElementById('entryReject');
+rejectButton.addEventListener('click', () => {
+  const rejectReason = document.getElementById('rejectReason').value;
+
+  if (!rejectReason) {
+    // Show an error message if rejectReason is empty
+    const errorMessage = document.querySelector('#viewJournalEntry .form__input--error-message');
+    errorMessage.textContent = 'There must be a reason for rejection.';
+  } else {
+    // Clear any previous error message
+    const errorMessage = document.querySelector('#viewJournalEntry .form__input--error-message');
+    errorMessage.textContent = '';
+
+    // Fetch the data associated with the unique ID from the database
+    const entryId = document.getElementById('viewJounralEntryID').textContent;
+    const entryRef = ref(database, `journalentries/${entryId}`);
+    get(entryRef)
+      .then((entrySnapshot) => {
+        if (entrySnapshot.exists()) {
+          const entryData = entrySnapshot.val();
+
+          // Update the permission to 0
+          entryData.permission = 0;
+
+          // Update the description with the rejectReason
+          entryData.description = rejectReason;
+
+          // Update the entry in the database
+          set(entryRef, entryData)
+            .then(() => {
+              // Handle success, e.g., show a message
+              alert('Entry rejected successfully');
+              form.reset();
+            })
+            .catch((error) => {
+              console.error('Error updating entry permission:', error);
+            });
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching journal entry:', error);
+      });
+  }
+});
+//---------------------------------------------------------------------------------------------------------
+//search journal + filter
+// Add an event listener for the search button
+const searchJournalsButton = document.getElementById('searchJournalsButton');
+searchJournalsButton.addEventListener('click', searchJournals);
+
+async function searchJournals() {
+  const searchInput = document.getElementById('searchJournalsInput').value;
+  const journalTableBody = document.getElementById('JournalTableBody');
+  journalTableBody.innerHTML = ''; // Clear the existing table content
+
+  // Query the database to find journal entries that match the search input
+  const journalEntriesRef = ref(database, 'journalentries');
+  const snapshot = await get(journalEntriesRef);
+
+  snapshot.forEach((childSnapshot) => {
+    const uniqueId = childSnapshot.key;
+    const journalData = childSnapshot.val();
+
+    // Check if the journalData contains the searched account name
+    for (const account in journalData) {
+      if (
+        account !== 'date' &&
+        account !== 'approval' &&
+        account !== 'description' &&
+        account !== 'permission' &&
+        account !== 'approval' &&
+        typeof journalData[account] === 'object' &&
+        journalData[account].hasOwnProperty('credit') &&
+        journalData[account].hasOwnProperty('debit') &&
+        account.toLowerCase().includes(searchInput.toLowerCase())
+      ) {
+        // Create a table row for the matching entry
+        const newRow = document.createElement('tr');
+        // Populate the table row with data (you can customize this)
+        newRow.innerHTML = `
+          <td>${uniqueId}</td>
+          <td>${journalData.date}</td>
+          <td>${account}</td>
+          <td>${journalData[account].debit}</td>
+          <td>${journalData[account].credit}</td>
+          <td>${journalData.status}</td>
+          <td>${journalData.approval}</td>
+          <td>${journalData.description}</td>
+          <td>actions</td>
+        `;
+
+        journalTableBody.appendChild(newRow);
+        break; // Exit the loop since we've found a match in this journal entry
+      }
+    }
+  });
+}
+
+
+
+// Function to filter and display journal entries based on status
+function filterAndDisplayJournalEntries(status) {
+  const tableBody = document.getElementById('JournalTableBody');
+  tableBody.innerHTML = ''; // Clear the existing table rows
+
+  // Retrieve the journal entries from the database
+  const journalEntriesRef = ref(database, 'journalentries');
+  get(journalEntriesRef).then((journalEntriesSnapshot) => {
+    if (journalEntriesSnapshot.exists()) {
+      const journalEntries = journalEntriesSnapshot.val();
+
+      // Iterate through the journal entries and create table rows
+      Object.keys(journalEntries).forEach((entryId) => {
+        const entry = journalEntries[entryId];
+        const permissionType = entry.permission;
+        var permissionValue;
+
+        if (permissionType === 1) {
+          permissionValue = "Waiting for Approval";
+        } else if (permissionType === 0) {
+          permissionValue = "Rejected";
+        } else {
+          permissionValue = "Approved";
+        }
+
+        // Check if the entry matches the selected status
+        if (status === 'all' || (status === 'waiting' && permissionType === 1) || status === permissionValue.toLowerCase()) {
+          const row = document.createElement('tr');
+
+          row.innerHTML = `
+            <td>${entryId}</td>
+            <td>${entry.date}</td>
+            <td>${getAccountNames(entry)}</td>
+            <td>${getAccountTotal(entry, 'debit')}</td>
+            <td>${getAccountTotal(entry, 'credit')}</td>
+            <td>${permissionValue}</td>
+            <td>${entry.approval}</td>
+            <td>${entry.description}</td>
+            <td><button class="journalviewButton" type="button" data-entry-id="${entryId}">View</button></td>
+          `;
+
+          // Add an event listener to the "View" button
+          const viewButton = row.querySelector('.journalviewButton');
+          viewButton.addEventListener('click', () => {
+            viewJournalEntry(entryId); // Call a function to display the entry when the button is clicked
+          });
+
+          tableBody.appendChild(row);
+        }
+      });
+    } else {
+      // Handle the case where no journal entries exist
+      tableBody.innerHTML = '<tr><td colspan="8">No journal entries found.</td></tr>';
+    }
+  });
+}
+// Add event listener to the status filter elements
+const statusFilter = document.getElementById('statusFilter');
+statusFilter.addEventListener('change', (event) => {
+  const selectedStatus = event.target.value;
+  filterAndDisplayJournalEntries(selectedStatus);
+});
+
+// Call the function to initially display all journal entries
+filterAndDisplayJournalEntries('all');
+
+
+//---------------------------------------------------------------------------------------------------------
+
+        function rearrangeDate(originalDate) {
+            // Split the original date into an array of parts: [YYYY, MM, DD]
+            const dateParts = originalDate.split('-');
+      
+            // Extract the month and year
+            const year = dateParts[0].substring(2);  // Take the last two digits of the year
+            const month = dateParts[1];
+      
+            // Concatenate and return the rearranged date (MMYY format)
+            const rearrangedDate = `${month}${year}`;
+            return rearrangedDate;
+      }
+
+
+    //copy code from index for creating user
+    function makeUsername(firstName, lastName, dateOfBirth){
+            const firstChar = firstName[0];
+            const newUserName = firstChar + lastName + dateOfBirth;
+            return newUserName;
+        }
+    
+        function hasNumber(input) {
+            return /\d/.test(input);
+        }
+    
+        function hasSpecialChar(input) {
+            const specialChars = /[!@#$%^&*(),.?":{}|<>]/;
+    
+            return specialChars.test(input);
+        }
+    
+        function hasLetter(input) {
+            const letter = /[a-zA-Z]/;
+    
+            return letter.test(input);
+        }
+    
+        function hasValue(input) {
+            return hasNumber(input) && hasLetter(input) && hasSpecialChar(input);
+        }
+    
+        function setInputError(inputElement, message){
+            inputElement.classList.add("form__input--error");
+            inputElement.parentElement.querySelector(".form__input--error-message").textContent = message;
+        } 
+    
+        function clearInputError(inputElement) {
+            inputElement.classList.remove("form__input--error");
+            inputElement.parentElement.querySelector(".form__input--error-message").textContent = "";
+        }
+
+        //takes in element form, the tpye of form (in this case we only have Sucess and Error for all of index), and the message which should be sent. (in case of username and password. Type stays error but message changes to indicate the error)
+        function setFormMessage(formElement, type, message) {
+            const messageElement = formElement.querySelector(".form__message");
+    
+            messageElement.textContent = message;
+            messageElement.classList.remove("form__message--success", "form__message--error");
+            messageElement.classList.add(`form__message--${type}`);
+        }
+
+
+
+    async function getUserData(uid) {
+      const userRef = ref(database, 'users/' + uid);
+      const snapshot = await get(userRef);
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        return userData.username;
+      } else {
+        return null;
+      }
+    }
+
+    async function displayUserData() {
+      const mainForm = document.querySelector("#mainPage");
+      const createNewAccountForm = document.querySelector("#createNewAccount");
+      const updateAccountForm = document.querySelector("#updateAccount");
+      const uids = getDataFromQuery();
+      const userList = document.getElementById('userList');
+
+      if (uids) {
+        const username = await getUserData(uids);
+        document.getElementById('dataDisplay').innerText = 'User: ' + (username || 'User not found');
+        document.getElementById('userImage').style.display = username ? 'block' : 'none';
+      } else {
+        document.getElementById('dataDisplay').innerText = 'No user UID passed.';
+        document.getElementById('userImage').style.display = 'none';
+      }
+
+      const usersRef = ref(database, 'users');
+      const usersSnapshot = await get(usersRef);
+
+      if (usersSnapshot.exists()) {
+        const users = usersSnapshot.val();
+        const sortedUsers = Object.values(users).sort((a, b) => a.cred - b.cred);
+
+        userList.innerHTML = '';  // Clear previous user list
+
+        sortedUsers.forEach(user => {
+          const userItem = document.createElement('li');
+          const userLink = document.createElement('a');
+    
+          // Set the link URL with the user's UID and add an event listener
+          userLink.href = `javascript:void(0);`;
+          userLink.addEventListener('click', () => {
+            selectedUserId = user.id;
+            
+            if(user.active){
+              document.getElementById('activateUser').textContent = 'Deactivate Account';
+            }else{
+              document.getElementById('activateUser').textContent = 'Activate Account';
+            }
+            
+            updateAccountForm.classList.remove('form--hidden');
+            createNewAccountForm.classList.add('form--hidden');
+            mainForm.classList.add('form--hidden');
+            
+           
+            
+            
+            // Set the data in the update account form based on the clicked user
+            updateFormWithData(user);
+          });
+
+          userLink.textContent = `Username: ${user.username}, Cred: ${user.cred}`;
+          userItem.appendChild(userLink);
+          
+          userList.appendChild(userItem);
+        });
+      }
+    }
+
+    function formatToTwoDecimalPlaces(num) {
+      return num.toFixed(2);
+    }
+
+    function formatMonetaryValue(value) {
+      // Ensure the value is a number
+      value = parseFloat(value);
+
+      // Check if the value is a valid number
+      if (isNaN(value)) {
+        return 'Invalid value';
+      }
+
+      // Format the monetary value with commas and two decimal places
+      return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    
+    async function findNextAvailableAccountNumber(category) {
+      const startAccountNumber = category === 'assets' ? 100 : 200;
+      const accountNumbers = await getAllAccountNumbers(category);
+
+      // Sort the account numbers
+      accountNumbers.sort((a, b) => a - b);
+
+      // Find the next available account number
+      for (let i = startAccountNumber; i < startAccountNumber + 100; i++) {
+        if (!accountNumbers.includes(i)) {
+          return i;
+        }
+      }
+
+      // No available account numbers
+      return -1;
+    }
+
+    //for some reason get function no work in while(true) loop,  next best option create list before check. 
+    //creats list of all account numebrs
+    async function getAllAccountNumbers(category) {
+      const accountNumbers = [];
+
+      const accountsRef = ref(database, 'accounts');
+      const snapshot = await get(accountsRef);
+      //loops to check in account aexits then checks account number. Pushes account number into list (tbh I looked up a guide, no idea how this works)
+      if (snapshot.exists()) {
+        const accountData = snapshot.val();
+        for (const accountKey in accountData) {
+          if (accountData.hasOwnProperty(accountKey)) {
+           const account = accountData[accountKey];
+           accountNumbers.push(account.accountNumber);
+          }
+        }
+      }
+
+      return accountNumbers;
+    }
+
+    async function searchAccountByAccountNumber(accountNumbers) {
+      const accountsRef = ref(database, 'accounts');
+
+      const accountsSnapshot = await get(accountsRef);
+
+      if (accountsSnapshot.exists()) {
+        const accounts = accountsSnapshot.val();
+        console.log(accounts);
+        for (const accountName in accounts) {
+          console.log(accounts[accountName].accountNumber, accountNumbers);
+          // Convert accountNumbers to a number for proper comparison
+          const accountNumbersAsNumber = parseInt(accountNumbers, 10);
+          if (accounts[accountName].accountNumber === accountNumbersAsNumber) {
+            console.log('Account found for account number:', accountNumbers);
+            return accounts[accountName];
+          }
+        }
+      }
+
       return null;
     }
+
+async function searchAccountByName(accountName) {
+  const accountRef = ref(database, 'accounts/' + accountName);
+  const snapshot = await get(accountRef);
+
+  if (snapshot.exists()) {
+    return snapshot.val();
   }
 
-  async function displayUserData() {
-    const uid = getDataFromQuery();  // Assuming the user.uid is passed as a parameter
-    if (uid) {
-      const username = await getUserData(uid);
-      if (username) {
-        document.getElementById('dataDisplay').innerText = 'User:' + username;
+  return null;
+}
 
-        document.getElementById('userImage').style.display = 'block'; // Show userImage
 
-      } else {
-        document.getElementById('dataDisplay').innerText = 'User not found.';
+    function getDataFromQuery() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('data');
+    }
 
-        document.getElementById('userImage').style.display = 'none'; // hide userImage
+    function activateEmail(){
+      if (!selectedUserId) {
+        alert('No user selected.');
+        return;
       }
-    } else {
-      document.getElementById('dataDisplay').innerText = 'No user UID passed.';
 
-      document.getElementById('userImage').style.display = 'none'; // hide userImage
+      // Fetch the user's email address based on the selectedUserId
+      const userRef = ref(database, 'users/' + selectedUserId);
+      get(userRef)
+      .then((snapshot) => {
+       if (snapshot.exists()) {
+         const userData = snapshot.val();
+         const userEmail = userData.email;
+         const active = userData.active;
+         let message = null;
+
+         if(active){
+          message = 'Your Account has been activated';
+         }else {
+          message = 'Your Account has been deactivated';
+         }
+
+         
+
+         // Prepare the email parameters
+         const emailParams = {
+            to_email: userEmail,  // Replace with the recipient's email address
+            subject: 'Account Activation Status',  // Replace with the desired subject
+            message: message  // Replace with the desired email content
+         };
+
+         // Send the email using EmailJS
+         emailjs.send('service_uhjncdn', 'template_57xcxk7', emailParams)
+           .then((response) => {
+             alert('Email sent successfully!', response);
+            })
+            .catch((error) => {
+              alert('Error sending email:', error);
+            });
+        } else {
+         alert('User not found.');
+        }
+      })
+      .catch((error) => {
+       alert('Error fetching user data: ' + error.message);
+     });
+    }
+
+    function addEventToLogs(accountName, eventData, eventId) {
+      
+}
+
+      let ascending = true; // Global variable to track sorting direction
+
+      function sortTable(colIndex) {
+        const tbody = document.getElementById('accountTableBody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort((a, b) => {
+          const aCell = a.children[colIndex];
+          const bCell = b.children[colIndex];
+
+          const aVal = aCell ? aCell.textContent.trim() : '';
+          const bVal = bCell ? bCell.textContent.trim() : '';
+
+          if (!isNaN(aVal) && !isNaN(bVal)) {
+            return ascending ? aVal - bVal : bVal - aVal;
+          } else {
+            return ascending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+          }
+        });
+
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+
+        // Update arrow indicators
+        const arrow = ascending ? '↑' : '↓';
+        const thElements = document.querySelectorAll('#accountTableForm thead th');
+        thElements.forEach((th, index) => {
+          // Reset to original content (without arrow or dash)
+          const originalContent = th.textContent.replace('↑', '').replace('↓', '').replace('—', '').trim();
+
+          if (index === colIndex) {
+            // Set the appropriate arrow based on the sorting direction
+            th.textContent = originalContent + ' ' + arrow;
+          } else {
+           // Set a dash for non-sorted columns
+            th.textContent = originalContent + ' —';
+          }
+        });
+
+        ascending = !ascending; // Toggle the sorting direction
+      }
+
+      const headerCells = document.querySelectorAll('#accountTableForm thead th');
+      headerCells.forEach((cell, index) => {
+        const originalContent = cell.textContent.trim(); // Store the original content
+        cell.textContent = originalContent + ' —'; // Add a dash at the beginning
+        cell.addEventListener('click', () => {
+          sortTable(index);
+        });
+      });
+
+    
+
+    searchAccountsButton.addEventListener('click', async (e) => {
+      var input = document.getElementById('searchAccounts').value;
+      
+      if(!input){
+        setInputError(document.getElementById('searchAccounts'), 'Please enter the Account Name or Number you would like to search for');
+      }
+
+      //numnbers only check
+      const numberPattern = /^[0-9]+$/;
+
+      let account;
+
+      //checks if input is only numbers (only numbers will only check Account Number, any thing else will check account Name)
+    if (numberPattern.test(input)) {
+    // Search by account number
+
+      account = await searchAccountByAccountNumber(input);
+      console.log('Account found by account number:', account);
+    
+    } else {
+      // Search by account name
+      account = await searchAccountByName(input);
+      console.log('Account found by account name:', account);
+    }
+
+    if(account === null){
+      alert('no account found using this search parameter');
+      return;
+    }
+
+    const searchedAccountTableBody = document.getElementById('searchedAccountTableBody');
+    searchedAccountTableBody.innerHTML = '';  // Clear previous data in the table
+
+    const tableRow = document.createElement('tr');
+      tableRow.innerHTML = `
+        <td>${account.accountNumber}</td>
+        <td>${account.accountName}</td>
+        <td>${account.category}</td>
+        <td>${account.subCategory}</td>
+        <td>${formatMonetaryValue(account.balance)}</td>
+        <td>${account.date}</td>
+        <td>
+          <button class="accountActionButton" title="View Account" type="button" data-account="${account.accountName}" data-action="view">View</button>
+        </td>
+      `;
+      searchedAccountTableBody.appendChild(tableRow);
+      
+      const accountTableForm = document.querySelector("#accountTableForm");
+      const searchedAccountTableForm = document.querySelector('#searchedAccountTable');
+      searchedAccountTableForm.classList.remove('form--hidden');
+      accountTableForm.classList.add('form--hidden');
+
+      const actionButtons = document.querySelectorAll('.accountActionButton');
+      actionButtons.forEach(button => {
+      button.addEventListener('click', (event) => {
+        const accountName = event.target.getAttribute('data-account');
+        const action = event.target.getAttribute('data-action');
+        console.log('Clicked on account:', accountName, 'with action:', action);
+
+        accountPerformAction(accountName, action);
+
+      });
+    });
+    });
+
+    CreateAccountsButton.addEventListener('click', async (e) => {
+      var accountName = document.getElementById('accountName').value;
+      var category =document.getElementById('category').value;
+      var subCategory = document.getElementById('subCategory').value;
+      var normalSide = document.getElementById('normalSide').value;
+      var initialBalance = document.getElementById('initialBalance').value;
+      var debit = document.getElementById('debit').value;
+      var credit = document.getElementById('credit').value;
+      var order = document.getElementById('order').value;
+      var statement = document.getElementById('statement').value;
+      var comment = document.getElementById('comment').value;
+      var description = document.getElementById('description').value;
+      
+      getAllAccountNumbers().then(accountNumbers => {
+        console.log('List of account numbers:', accountNumbers);
+      });
+      
+      //Check for correct values
+      if (!accountName || (!category || (category !== 'assets' && category !== 'liabilities')) || !subCategory || (!normalSide || (normalSide !== 'debit' && normalSide !== 'credit')) || !initialBalance || !debit || !credit || !order || !statement || !comment || !description){
+        if(!accountName){
+          setInputError(document.getElementById('accountName'), 'Please enter the Account Name');
+        }
+        if(!category){
+          setInputError(document.getElementById('category'), 'Please enter the Account Category');
+        }else if (category !== 'assets' && category !== 'liabilities'){
+          setInputError(document.getElementById('category'), 'The account category provided is not valid');
+        }
+        if(!subCategory){
+          setInputError(document.getElementById('subCategory'), 'Please enter the Account Sub-Catergory');
+        }
+        if(!normalSide){
+          setInputError(document.getElementById('normalSide'), 'Please enter the Account normal side');
+        }else if(normalSide !== 'credit' && normalSide !== 'debit'){
+          setInputError(document.getElementById('normalSide'), 'The account normal side provided is not valid');
+        }
+        if(!initialBalance){
+          setInputError(document.getElementById('initialBalance'), 'Please enter the Account Balance');
+        }
+        if(!credit){
+          setInputError(document.getElementById('credit'), 'Please enter the credit');
+        }
+        if(!debit){
+          setInputError(document.getElementById('debit'), 'Please enter the debit');
+        }
+        if(!order){
+          setInputError(document.getElementById('order'), 'Please enter the order');
+        }
+        if(!statement){
+          setInputError(document.getElementById('statement'), 'Please enter the statement');
+        }
+        if(!comment){
+          setInputError(document.getElementById('comment'), 'Please enter A comment');
+        }
+        if(!description){
+          setInputError(document.getElementById('description'), 'Please enter a description');
+        }
+        
+        return;
+      }
+
+      //Date Of creation
+      var currentDate = new Date();
+      var formattedDate = currentDate.toLocaleString();
+
+      //user who created account
+      var userCreation = getDataFromQuery();
+
+      //current balance = initial balance  at creation
+      var balance = initialBalance;
+      
+      //same account name
+      const accountRef = ref(database, 'accounts/' + accountName);
+      
+      const snapshot = await get(accountRef);
+
+      if (snapshot.exists()) {
+        setInputError(document.getElementById('accountName'), 'This account Name already exists, please enter a new one');
+        return;
+      }
+
+      var initialBalance = parseFloat(document.getElementById('initialBalance').value);
+var debit = parseFloat(document.getElementById('debit').value);
+var credit = parseFloat(document.getElementById('credit').value);
+var order = parseInt(document.getElementById('order').value);
+
+      
+      //accountNumber
+      const accountNumber = await findNextAvailableAccountNumber(category);
+      alert(accountNumber);
+      
+
+      set(ref(database, 'accounts/' + accountName), {
+        accountName: accountName,
+        category: category,
+        accountNumber: accountNumber,
+        subCategory: subCategory,
+        normalSide: normalSide,
+        initialBalance: initialBalance,
+        balance: balance,
+        debit: debit,
+        credit: credit,
+        order: order,
+        statement: statement,
+        comment: comment,
+        description: description,
+        date: formattedDate,
+        userId: userCreation
+      })
+
+      alert('account created');
+
+    });
+
+    let currentEventId = 0;
+
+    editAccountsButton.addEventListener('click', async (e) => {
+
+      var subCategory = document.getElementById('editSubCategory').value;
+      var normalSide = document.getElementById('editNormalSide').value;
+      var order = document.getElementById('editOrder').value;
+      var statement = document.getElementById('editStatement').value;
+      var comment = document.getElementById('editComment').value;
+      var description = document.getElementById('editDescription').value;
+
+      if (!subCategory || !normalSide || !order || !statement || !comment || !description){
+        
+        if(!subCategory){
+          setInputError(document.getElementById('editSubCategory'), 'Please enter the Account Sub-Catergory');
+        }
+        if(!normalSide){
+          setInputError(document.getElementById('editNormalSide'), 'Please enter the Account normal side');
+        }
+        if(!order){
+          setInputError(document.getElementById('editOrder'), 'Please enter the order');
+        }
+        if(!statement){
+          setInputError(document.getElementById('editStatement'), 'Please enter the statement');
+        }
+        if(!comment){
+          setInputError(document.getElementById('editComment'), 'Please enter A comment');
+        }
+        if(!description){
+          setInputError(document.getElementById('editDescription'), 'Please enter a description');
+        }
+        
+        return;
+      }
+
+      var accountName = document.getElementById('editAccountName').textContent;
+
+      const updatedAccountData = {
+        subCategory : subCategory,
+        normalSide : normalSide,
+        order : order,
+        statement : statement,
+        comment : comment,
+        description : description
+      };
+
+      const accountRef = ref(database, `accounts/${accountName}`);
+
+  try {
+    const existingAccountData = await get(ref(database, `accounts/${accountName}`)).then((snapshot) => snapshot.val());
+
+    // Merge the existing account data with the updated data
+    const mergedAccountData = { ...existingAccountData, ...updatedAccountData };
+
+    var userInfo = getDataFromQuery();
+    if (!userInfo){
+      userInfo = "empty";
+    }
+
+    var currentDate = new Date();
+    var formattedDate = currentDate.toLocaleString();
+
+    // Fetch the current event count from the database
+    const eventCountRef = ref(database, `accounts/${accountName}/logs/eventCount`);
+    const eventCountSnapshot = await get(eventCountRef);
+    const currentEventId = eventCountSnapshot.val() || 0;
+
+    // Increment the event count
+    const newEventCount = currentEventId + 1;
+    await set(eventCountRef, newEventCount);
+
+    // Create event data object with the incremented eventId
+    const eventData = {
+      eventId: newEventCount,
+      accountDataChanges: mergedAccountData,
+      dateTime: formattedDate,
+      userId: userInfo,
+    };
+
+    // Add the event data to logs
+    await set(ref(database, `accounts/${accountName}/logs/events/${newEventCount}`), eventData);
+    update(accountRef, updatedAccountData)
+            .then(() => {
+            // Data updated successfully
+            alert('Account data updated successfully');
+            })
+            .catch((error) => {
+            // Update failed
+            alert('Account to update user data: ' + error.message);
+            });
+
+
+    alert('Account updated successfully');
+  } catch (error) {
+    console.error('Error updating account:', error);
+    alert('Error updating account. Please try again.');
+  }
+  
+
+    });
+
+    submitData.addEventListener('click', (e) => {
+            
+    
+            var email = document.getElementById('realEmail').value;
+            var password = document.getElementById('realPassword').value;
+            var authentication = document.getElementById('authentication').value;
+            var firstName = document.getElementById('firstName').value;
+            var lastName = document.getElementById('lastName').value;
+            var date = document.getElementById('dateOfBirth').value;
+            var address = document.getElementById('address').value;
+            var reDate = rearrangeDate(date);
+            var userName = makeUsername(firstName, lastName, reDate);
+
+    
+            if (!email || !password || !firstName || !lastName || !date || !address || !authentication) {
+                
+                if(!email){
+                    setInputError(document.getElementById('realEmail'), 'please enter your Email');
+                }
+                if(!password) {
+                    setInputError(document.getElementById('realPassword'), 'please enter your password');
+                }
+                if(!firstName){
+                    setInputError(document.getElementById('firstName'), 'please enter your First Name');
+                }
+                if(!lastName){
+                    setInputError(document.getElementById('lastName'), 'please enter your Last Name');
+                }
+                if(!date){
+                    setInputError(document.getElementById('dateOfBirth'), 'please enter your Birth Date');
+                }
+                if(!address){
+                    setInputError(document.getElementById('address'), 'please enter your address');
+                }
+                if(!authentication){
+                  setInputError(document.getElementById('authentication'), 'please enter the creds');
+                }
+                return; // Stop further execution
+            } 
+            var cred;
+            if(authentication === 'user'){
+              cred = 0;
+            }else if(authentication === 'manager'){
+              cred = 1;
+            }else if(authentication === 'admin'){
+              cred = 2;
+            }else{
+              setInputError(document.getElementById('authentication'), 'That is not a correct cred');
+              return; //stop further execution
+            }
+                
+    
+    
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                 // Signed in 
+                const user = userCredential.user;
+                // ...
+                set(ref(database, 'users/' + user.uid), {
+                    username: userName,
+                    email: email,
+                    password: password,
+                    firstName: firstName,
+                    lastName: lastName,
+                    dateOfBirth: date,
+                    address: address,
+                    cred: cred,
+                    id: user.uid,
+                    active: true
+                })
+                    .then(() => {
+                      // Data saved successfully!
+                      alert('user created successfully')
+                    })
+                    .catch((error) => {
+                    // The write failed...
+                      alert(error);
+                    });
+                
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                // ..
+                alert(error.message)
+            }); 
+    
+            
+        }); 
+
+        updateData.addEventListener('click', (e) => {
+          e.preventDefault();
+
+          if(!selectedUserId) {
+            alert(selectedUserId);
+            return;
+          }
+
+          const updatedFirstName = document.getElementById('updatefirstName').value;
+          const updatedLastName = document.getElementById('updatelastName').value;
+          const updatedAddress = document.getElementById('updateaddress').value;
+          const updatedDateOfBirth = document.getElementById('updatedateOfBirth').value;
+          const updatedEmail = document.getElementById('updaterealEmail').value;
+          const updatedPassword = document.getElementById('updaterealPassword').value;
+          const updatedAuthentication = document.getElementById('updateauthentication').value;
+
+          // Rearrange the updated date of birth
+          const updatedReDate = rearrangeDate(updatedDateOfBirth);
+
+          // Generate the updated username
+          const updatedUserName = makeUsername(updatedFirstName, updatedLastName, updatedReDate);
+
+          if (!updatedEmail || !updatedPassword || !updatedFirstName || !updatedLastName || !updatedDateOfBirth || !updatedAddress || !updatedAuthentication) {
+                
+                if(!updatedEmail){
+                    setInputError(document.getElementById('updaterealEmail'), 'please enter your Email');
+                }
+                if(!updatedPassword) {
+                    setInputError(document.getElementById('updaterealPassword'), 'please enter your password');
+                }
+                if(!updatedFirstName){
+                    
+                    setInputError(document.getElementById('updatefirstName'), 'please enter your First Name');
+                }
+                if(!updatedLastName){
+                    setInputError(document.getElementById('updatelastName'), 'please enter your Last Name');
+                }
+                if(!updatedDateOfBirth){
+                    setInputError(document.getElementById('updatedateOfBirth'), 'please enter your Birth Date');
+                }
+                if(!updatedAddress){
+                    setInputError(document.getElementById('updateaddress'), 'please enter your address');
+                }
+                if(!updatedAuthentication){
+                  setInputError(document.getElementById('updateauthentication'), 'please enter the creds');
+                }
+                return; // Stop further execution
+            } 
+            var cred;
+            if(updatedAuthentication === 'user'){
+              cred = 0;
+            }else if(updatedAuthentication === 'manager'){
+              cred = 1;
+            }else if(updatedAuthentication === 'admin'){
+              cred = 2;
+            }else{
+              setInputError(document.getElementById('authentication'), 'That is not a correct cred');
+              return; //stop further execution
+            }
+
+
+          // Update the user data in the database
+          const userRef = ref(database, 'users/' + selectedUserId);
+          const updates = {
+            username: updatedUserName,
+            email: updatedEmail,
+            password: updatedPassword,
+            firstName: updatedFirstName,
+            lastName: updatedLastName,
+            dateOfBirth: updatedDateOfBirth,
+            address: updatedAddress,
+            cred: cred
+          };
+          update(userRef, updates)
+            .then(() => {
+            // Data updated successfully
+            alert('User data updated successfully');
+            })
+            .catch((error) => {
+            // Update failed
+            alert('Failed to update user data: ' + error.message);
+            });
+          });
+          
+
+        document.getElementById('viewEventLog').addEventListener('click', async (e) => {
+          e.preventDefault();
+
+          const eventLogTableForm = document.querySelector('#eventLogTableForm');
+          const viewAccountForm = document.querySelector("#viewAccountForm");
+
+          
+          
+          const accountName = document.getElementById('eventLogAccount').textContent; // Replace with the actual account name
+  
+
+          const eventsRef = ref(database, `accounts/${accountName}/logs/events`);
+          const eventsSnapshot = await get(eventsRef);
+
+          if (eventsSnapshot.exists()) {
+            
+            eventLogTableForm.classList.remove('form--hidden');
+            viewAccountForm.classList.add('form--hidden');
+
+            const events = eventsSnapshot.val();
+            displayEvents(events);
+          } else {
+          alert('No events found for this account.');
+          }
+        });
+
+      document.getElementById('viewLedgerButton').addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        const viewAccountForm = document.querySelector("#viewAccountForm");
+        const viewLedgerPageForm = document.querySelector('#viewLedgerPage');
+
+        const accountName = document.getElementById('ledgerAccount').textContent;
+
+        const ledgerRef = ref(database, `accounts/${accountName}/ledger`);
+        const legerSnapshot = await get(ledgerRef);
+
+        if (legerSnapshot.exists()) {
+
+          viewAccountForm.classList.add('form--hidden');
+          viewLedgerPageForm.classList.remove('form--hidden');
+
+          const ledger = legerSnapshot.val();
+          displayLedger(ledger);
+        }else{
+          alert('No events found for this account. ');
+        }
+
+      });
+
+      document.getElementById('emailAccountID').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const viewAccountForm = document.querySelector("#viewAccountForm");
+        const emailForm = document.querySelector("#email");
+
+        viewAccountForm.classList.add("form--hidden");
+        emailForm.classList.remove("form--hidden");
+
+      })
+
+      document.getElementById('activateUser').addEventListener('click', (e) => {
+        e.preventDefault();
+
+        if (!selectedUserId) {
+          alert('No user selected.');
+          return;
+        }
+
+        const userRef = ref(database, 'users/' + selectedUserId);
+        
+        // Get the current user's data
+        get(userRef)
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            const userData = snapshot.val();
+            const updatedActiveState = !userData.active; // Toggle the active state
+
+            // Update the 'active' field in the database
+            update(userRef, { active: updatedActiveState })
+              .then(() => {
+                if(updatedActiveState){
+                  alert(`User Activated`);
+                  activateEmail();
+                  document.getElementById('activateUser').textContent = 'Deactivate Account';
+                }else{
+                  alert('User Deactivated');
+                  activateEmail();
+                  document.getElementById('activateUser').textContent = 'Activate Account';
+                }
+                
+              })
+              .catch((error) => {
+                alert('Failed to update user activation status: ' + error.message);
+             });
+          } else {
+          alert('User not found.');
+          }
+        })
+        .catch((error) => {
+          alert('Error fetching user data: ' + error.message);
+        });
+      });
+
+      document.getElementById('sendEmailButton').addEventListener('click', (e) => {
+  e.preventDefault();
+
+  if (!selectedUserId) {
+    selectedUserId = 'LIkmvwCDlpbfILkMBMK1YK5BfX52';
+    
+  }
+
+  // Fetch the user's email address based on the selectedUserId
+  const userRef = ref(database, 'users/' + selectedUserId);
+  get(userRef)
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        const userEmail = userData.email;
+        const emailSubject = document.getElementById('subject').value;
+        const emailMessage = document.getElementById('message').value;
+        
+
+        // Prepare the email parameters
+        const emailParams = {
+          to_email: userEmail,  // Replace with the recipient's email address
+          subject: emailSubject,  // Replace with the desired subject
+          message: emailMessage   // Replace with the desired email content
+        };
+
+        // Send the email using EmailJS
+        emailjs.send('service_uhjncdn', 'template_57xcxk7', emailParams)
+          .then((response) => {
+            alert('Email sent successfully!', response);
+          })
+          .catch((error) => {
+            alert('Error sending email:', error);
+          });
+      } else {
+        alert('User not found.');
+      }
+    })
+    .catch((error) => {
+      alert('Error fetching user data: ' + error.message);
+    });
+});
+
+function performAction(userId, action) {
+
+  if (action === 'edit') {
+    const userRef = ref(database, `users/${userId}`);
+    get(userRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          updateFormWithData(userData);
+          selectedUserId = userId;
+          const mainForm = document.querySelector("#mainPage");
+          const createNewAccountForm = document.querySelector("#createNewAccount");
+          const updateAccountForm = document.querySelector("#updateAccount");
+          const userForm = document.querySelector('#tableForm');
+          mainForm.classList.add("form--hidden");
+          createNewAccountForm.classList.add("form--hidden");
+          updateAccountForm.classList.remove("form--hidden");
+          userForm.classList.add("form--hidden");
+        } else {
+          alert('User not found.');
+        }
+      })
+      .catch((error) => {
+        alert('Error fetching user data: ' + error.message);
+      });
+  } else if (action === 'delete') {
+    alert('Delete action triggered for user ID: ' + userId);
+    // Implement delete action here
+  } else if (action === 'view') {
+    alert('View action triggered for user ID: ' + userId);
+    // Implement view action here
+  }
+}
+
+//called in accountTable
+async function accountPerformAction(accountName, action) {
+  const mainForm = document.querySelector("#mainPage");
+  const createNewAccountForm = document.querySelector("#createNewAccount");
+  const updateAccountForm = document.querySelector("#updateAccount");
+  const emailForm = document.querySelector("#email");
+  const tableForm = document.querySelector("#tableForm");
+  const accountTableForm = document.querySelector("#accountTableForm");
+  const createNewAccountsForm = document.querySelector("#createNewAccountForm");
+  const searchedAccountTableForm = document.querySelector('#searchedAccountTable');
+  const viewAccountForm = document.querySelector("#viewAccountForm");
+  const editAccountForm = document.querySelector("#editAccountForm");
+
+
+  const accountRef = ref(database, `accounts/${accountName}`);
+
+  if (action === 'edit') {
+    
+    const userRef = ref(database, `accounts/${accountName}`);
+    updateAccountFromData(userRef);
+
+    searchedAccountTableForm.classList.add("form--hidden");
+    createNewAccountForm.classList.add("form--hidden");
+    accountTableForm.classList.add("form--hidden");
+    editAccountForm.classList.remove("form--hidden");
+
+  }else if (action === 'delete'){
+
+    if (accountRef.balance !== 0) {
+      alert('Cannot delete Account while there is still a balance');
+      return;
+    }
+    try {
+      await remove(accountRef);
+      alert('Account deleted successfully');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert('Error deleting account. Please try again.');
+    }
+  }else if (action === 'view'){
+    const accountSnapshot = await get(accountRef);
+
+    if (accountSnapshot.exists()) {
+      const account = accountSnapshot.val();
+      displayAccountInfo(account);
+
+      // Hide other forms and show the viewAccountForm
+      searchedAccountTableForm.classList.add("form--hidden");
+      createNewAccountForm.classList.add("form--hidden");
+      accountTableForm.classList.add("form--hidden");
+      viewAccountForm.classList.remove("form--hidden");
+      document.getElementById('eventLogAccount').textContent = accountSnapshot.val().accountName;
+      document.getElementById('ledgerAccount').textContent = accountSnapshot.val().accountName;
+      
+    } else {
+      alert('Account not found.');
+    }
+  }
+}
+
+function displayLedger(ledger) {
+  const ledgerTableBody = document.getElementById('LedgerTableBody');
+  ledgerTableBody.innerHTML = ''; // Clear any existing content
+
+  const searchInput = document.getElementById('searchLedgerInput').value.toLowerCase();
+
+  for (const ledgerKey in ledger) {
+    const ledgerEntry = ledger[ledgerKey];
+    const { journalEntryId, entryDate, debit, credit, balance, description } = ledgerEntry;
+
+    // Check if the journal ID or balance includes the search input
+    if (journalEntryId.toLowerCase().includes(searchInput) || balance.toString().includes(searchInput)) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${journalEntryId}</td>
+        <td>${entryDate}</td>
+        <td>${debit || ''}</td>
+        <td>${credit || ''}</td>
+        <td>${balance}</td>
+        <td>${description}</td>
+        <td>
+          <button class="viewJournalEntry" title="View Journal Entry" type="button" data-entry="${ledgerKey}" data-journal-id="${journalEntryId}">View Journal Entry</button>
+        </td>
+      `;
+
+      ledgerTableBody.appendChild(row);
     }
   }
 
-  function getDataFromQuery() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('data');  // Assuming 'data' is the parameter for user.uid
+  // Add event listeners to the "View Journal Entry" buttons
+  const viewJournalEntryButtons = document.querySelectorAll('.viewJournalEntry');
+  viewJournalEntryButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const journalEntryId = button.getAttribute('data-journal-id');
+      viewJournalEntry(journalEntryId); // Implement this function to display the specific entry
+    });
+  });
+}
+
+function searchLedger(ledger) {
+  const ledgerTableBody = document.getElementById('LedgerTableBody');
+  ledgerTableBody.innerHTML = ''; // Clear any existing content
+
+  const searchInput = document.getElementById('searchLedgerInput').value.toLowerCase();
+
+  for (const ledgerKey in ledger) {
+    const ledgerEntry = ledger[ledgerKey];
+    const { journalEntryId, entryDate, debit, credit, balance, description } = ledgerEntry;
+
+    // Check if the journal ID or balance includes the search input
+    if (journalEntryId.toLowerCase().includes(searchInput) || balance.toString().includes(searchInput)) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${journalEntryId}</td>
+        <td>${entryDate}</td>
+        <td>${debit || ''}</td>
+        <td>${credit || ''}</td>
+        <td>${balance}</td>
+        <td>${description}</td>
+        <td>
+          <button class="viewJournalEntry" title="View Journal Entry" type="button" data-entry="${ledgerKey}" data-journal-id="${journalEntryId}">View Journal Entry</button>
+        </td>
+      `;
+
+      ledgerTableBody.appendChild(row);
+    }
   }
 
-  displayUserData();
+  // Add event listeners to the "View Journal Entry" buttons
+  const viewJournalEntryButtons = document.querySelectorAll('.viewJournalEntry');
+  viewJournalEntryButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const journalEntryId = button.getAttribute('data-journal-id');
+      viewJournalEntry(journalEntryId); // Implement this function to display the specific entry
+    });
+  });
+}
+
+// Add a click event listener for the search button
+const searchLedgerButton = document.getElementById('searchLedgerButton');
+searchLedgerButton.addEventListener('click', () => {
+  const accountName = document.getElementById('ledgerAccount').textContent;
+  const ledgerRef = ref(database, `accounts/${accountName}/ledger`);
+  get(ledgerRef)
+    .then((ledgerSnapshot) => {
+      if (ledgerSnapshot.exists()) {
+        const ledger = ledgerSnapshot.val();
+        searchLedger(ledger);
+      } else {
+        alert('No events found for this account.');
+      }
+    })
+    .catch((error) => {
+      console.error('Error fetching ledger data:', error);
+    });
+});
+
+const filterLedgerButton = document.getElementById('filterLedgerButton');
+filterLedgerButton.addEventListener('click', () => {
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+
+  const accountName = document.getElementById('ledgerAccount').textContent;
+  const ledgerRef = ref(database, `accounts/${accountName}/ledger`);
+
+  get(ledgerRef)
+    .then((ledgerSnapshot) => {
+      if (ledgerSnapshot.exists()) {
+        const ledger = ledgerSnapshot.val();
+        filterAndDisplayLedger(ledger, startDate, endDate);
+      } else {
+        alert('No events found for this account.');
+      }
+    })
+    .catch((error) => {
+      console.error('Error fetching ledger data:', error);
+    });
+});
+
+function filterAndDisplayLedger(ledger, startDate, endDate) {
+  const ledgerTableBody = document.getElementById('LedgerTableBody');
+  ledgerTableBody.innerHTML = ''; // Clear any existing content
+
+  for (const ledgerKey in ledger) {
+    const ledgerEntry = ledger[ledgerKey];
+    const { journalEntryId, entryDate, debit, credit, balance, description } = ledgerEntry;
+
+    // Parse the entry date as a Date object
+    const entryDateObj = new Date(entryDate);
+
+    // Check if the entry date is within the selected date range
+    if (
+      (!startDate || entryDateObj >= new Date(startDate)) &&
+      (!endDate || entryDateObj <= new Date(endDate))
+    ) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${journalEntryId}</td>
+        <td>${entryDate}</td>
+        <td>${debit || ''}</td>
+        <td>${credit || ''}</td>
+        <td>${balance}</td>
+        <td>${description}</td>
+        <td>
+          <button class="viewJournalEntry" title="View Journal Entry" type="button" data-entry="${ledgerKey}" data-journal-id="${journalEntryId}">View Journal Entry</button>
+        </td>
+      `;
+
+      ledgerTableBody.appendChild(row);
+    }
+  }
+
+  // Add event listeners to the "View Journal Entry" buttons (same as before)
+  const viewJournalEntryButtons = document.querySelectorAll('.viewJournalEntry');
+  viewJournalEntryButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const journalEntryId = button.getAttribute('data-journal-id');
+      viewJournalEntry(journalEntryId); // Implement this function to display the specific entry
+    });
+  });
+}
+
+
+
+
+
+
+
+
+function displayEvents(events) {
+  const viewAccountForm = document.querySelector("#viewAccountForm");
+  const eventLogTableForm = document.querySelector('#eventLogTableForm');
+
+  const eventLogTableBody = document.getElementById('eventLogTableBody');
+  eventLogTableBody.innerHTML = ''; // Clear any existing content
+
+  for (const eventKey in events) {
+    const eventData = events[eventKey];
+    const { eventId, accountDataChanges, dateTime, userId } = eventData;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${eventId}</td>
+      <td>${dateTime}</td>
+      <td>${userId}</td>
+      <td>
+        <button class="viewActionButton" title="View Account Information" type="button" data-accounts="${eventKey}">View</button>
+      </td>
+    `;
+
+    eventLogTableBody.appendChild(row);
+  }
+
+  const actionButtons = document.querySelectorAll('.viewActionButton');
+  actionButtons.forEach(button => {
+    button.addEventListener('click', (event) => {
+      const eventId = event.target.getAttribute('data-accounts');
+      const accountChangedInfo = events[eventId].accountDataChanges;
+      
+      viewAccountForm.classList.remove('form--hidden');
+      eventLogTableForm.classList.add('form--hidden');
+      displayAccountInfo(accountChangedInfo);
+    });
+  });
+}
+
+async function displayAllUsers() {
+  const usersRef = ref(database, 'users');
+  const usersSnapshot = await get(usersRef);
+  
+  if (usersSnapshot.exists()) {
+    const usersData = usersSnapshot.val();
+
+    const userTableBody = document.getElementById('userTableBody');
+    userTableBody.innerHTML = '';  // Clear previous data in the table
+
+    let index = 1;
+    for (const userId in usersData) {
+      const userData = usersData[userId];
+      const { username, firstName, lastName, email, cred, active } = userData;
+
+      const tableRow = document.createElement('tr');
+      tableRow.innerHTML = `
+        <td>${index}</td>
+        <td>${username}</td>
+        <td>${firstName} ${lastName}</td>
+        <td>${email}</td>
+        <td>${active ? 'Active' : 'Inactive'}</td>
+        <td>${cred}</td>
+        <td>
+          <button class="actionButton" title="Edit Account Information" type="button" data-userid="${userId}" data-action="edit">Edit</button>
+          <button class="actionButton" title="Delete Account" type="button" data-userid="${userId}" data-action="delete">Delete</button>
+          <button class="actionButton" title="View Account Information" type="button" data-userid="${userId}" data-action="view">View</button>
+        </td>
+      `;
+
+      userTableBody.appendChild(tableRow);
+      index++;
+    }
+    const actionButtons = document.querySelectorAll('.actionButton');
+  actionButtons.forEach(button => {
+    button.addEventListener('click', (event) => {
+      
+      const userId = event.target.getAttribute('data-userid');
+      const action = event.target.getAttribute('data-action');
+      performAction(userId, action);
+    });
+  });
+  } else {
+    // Handle case where there are no users
+    const userTableBody = document.getElementById('userTableBody');
+    userTableBody.innerHTML = '<tr><td colspan="6">No users found.</td></tr>';
+  }
+}
+
+async function displayAllAccounts() {
+  const accountsRef = ref(database, 'accounts');
+  const accountsSnapshot = await get(accountsRef);
+  
+  if (accountsSnapshot.exists()) {
+    const accountsData = accountsSnapshot.val();
+
+    const accountTableBody = document.getElementById('accountTableBody');
+    accountTableBody.innerHTML = '';  // Clear previous data in the table
+
+    let index = 1;
+    for (const accountName in accountsData) {
+      const accountData = accountsData[accountName];
+      const { accountNumber, category, subCategory, balance, date} = accountData;
+
+      const tableRow = document.createElement('tr');
+      tableRow.innerHTML = `
+        <td>${accountNumber}</td>
+        <td>${accountName}</td>
+        <td>${category}</td>
+        <td>${subCategory}</td>
+        <td>$${formatMonetaryValue(balance)}</td>
+        <td>${date}</td>
+        <td>          
+          <button class="accountActionButton" title="View Account Information" type="button" data-account="${accountName}" data-action="view">View</button>
+        </td>
+      `;
+
+      accountTableBody.appendChild(tableRow);
+      index++;
+    }
+    const actionButtons = document.querySelectorAll('.accountActionButton');
+    actionButtons.forEach(button => {
+      button.addEventListener('click', (event) => {
+        const accountName = event.target.getAttribute('data-account');
+        const action = event.target.getAttribute('data-action');
+        console.log('Clicked on account:', accountName, 'with action:', action);
+
+        accountPerformAction(accountName, action);
+
+      });
+    });
+  } else {
+    // Handle case where there are no users
+    const userTableBody = document.getElementById('userTableBody');
+    userTableBody.innerHTML = '<tr><td colspan="6">No users found.</td></tr>';
+  }
+}
+
+
+
+displayAllUsers();
+
+displayAllAccounts();
+
+displayUserData(); // Call the function after defining it
 
   </script>
 </body>
 </html>
-
-

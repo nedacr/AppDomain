@@ -19,7 +19,7 @@
   </div>
   
   <div class="container">
-    <form class="form form--hidden" id="mainPage">
+    <form class="form" id="mainPage">
     <h2>Main Content</h2>
     <p>This is the main content of your webpage contained within a container.</p>
     <p>Content Goes Here</p>
@@ -46,6 +46,14 @@
 
   <form class="form form--hidden" id="viewLedgerPage">
     <h1 class="form__title" id="ledgerAccount"></h1>
+    <div class="form__input-group">
+      <input type="text" id="searchLedgerInput" class="form__input" placeholder="Search Ledger by Journal ID or Balance">
+      <button id="searchLedgerButton" class="form__button" type="button">Search</button>
+      <div class="form__input--error-message"></div>
+    </div>
+
+    
+  
 
     <table>
       <thead>
@@ -62,6 +70,19 @@
 
       <tbody id="LedgerTableBody"></tbody>
     </table>
+
+    <div class="form__input-group">
+      <label for="startDate">Start Date:</label>
+      <input type="date" id="startDate" class="form__input">
+    </div>
+  
+    <div class="form__input-group">
+      <label for="endDate">End Date:</label>
+      <input type="date" id="endDate" class="form__input">
+    </div>
+  
+    <button id="filterLedgerButton" class="form__button" type="button">Filter by Date</button>
+
   </form>
 
   <form class="form form--hidden" id="journalPage">
@@ -136,6 +157,7 @@
       <input type="text" id="journalDescription" class="form__input" autofocus placeholder="Discription">
       <div class="form__input--error-message"></div>
     </div>
+    <input type="file" id="fileInput" accept=".pdf, .csv, .docx, .jpg, .png, .xlsx" />
     <button type="button" id="addRow">Add Row</button>
     <button type="button" id="clearForm">Clear</button>
     <button type="submitJournalEntry">Submit</button>
@@ -193,6 +215,7 @@
       <div class="form__input--error-message"></div>
     </div>
     <button class="form__button" id="entryReject" type="button" title="Reject the Entry">reject</button>
+    <a id="downloadLink" href="#" style="display: none" download>Download File</a>
   </form>
 
   <form class="form form--hidden" id="accountTableForm">
@@ -379,6 +402,7 @@
     </table>
     <button class="form__button" id="viewLedgerButton" title="Open Ledger Page">Open Ledger</button>
     <button class="form__button" id="viewEventLog" title="Open Event Log Page">View Event Log</button>
+    <button class="form__button" id="emailAccountID" title="email User who created account">Email Admin</button>
   </form>
 
   <form class="form form--hidden" id="editAccountForm">
@@ -526,6 +550,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getDatabase, set, ref, update, get, remove, runTransaction } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL} from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js';
   const firebaseConfig = {
           apiKey: "AIzaSyCjKjeEiIpaLybLGQzoPlnGp1D6XYuh8Lw",
           authDomain: "swe4713temp.firebaseapp.com",
@@ -534,6 +559,7 @@
           storageBucket: "swe4713temp.appspot.com",
           messagingSenderId: "1067050664646",
           appId: "1:1067050664646:web:c07f85156618fcbb59cdc7",
+          storageBucket: "swe4713temp.appspot.com",
           measurementId: "G-7L55RX7DM3"
         };
 
@@ -543,11 +569,10 @@
 
     const auth = getAuth(app);
 
-    
+    const storage = getStorage(app);
     
     //when selected user gets stored to update for later
     let selectedUserId = null;
-
 
     
 
@@ -816,6 +841,12 @@
         async function submitJournalEntry(event) {
   event.preventDefault(); // Prevent the default form submission behavior
 
+
+  //--------------------------------------------------------------------------
+  const fileInput = document.getElementById('fileInput');
+  const file = fileInput.files[0];
+  //--------------------------------------------------------------------------
+
   var journalDescription = document.getElementById('journalDescription').value;
 
   const rows = Array.from(tbody.querySelectorAll('tr'));
@@ -907,6 +938,35 @@
   // Create a reference to the "journalentries" with the unique ID
   const newEntryRef = ref(database, `journalentries/${uniqueId}`);
 
+  if (file) {
+     // Construct the storage path
+     const storagePath = `journal/${uniqueId}/savedfile/entryFile`;
+
+    // Upload the file to Firebase Storage
+    const filestorageRef = storageRef(storage, storagePath);
+    const uploadTask = uploadBytes(filestorageRef, file);
+
+
+
+    uploadTask.then(() => {
+      // The file has been successfully uploaded
+      console.log('File uploaded to:', storagePath);
+
+      
+      // Now, you can continue with your other data submission logic.
+      // You may want to store the `storagePath` in your database to link it to the journal entry.
+
+      // Continue with your data submission logic here...
+    }).catch((error) => {
+      // Handle the file upload error
+      console.error('Error uploading file:', error);
+    });
+  }
+
+
+
+
+
   // Store the entire journal data under the unique ID
   set(newEntryRef, journalData)
     .then(async () => {
@@ -944,7 +1004,7 @@ async function updateAccounts(accountUpdates, uniqueID, date, description) {
       accountData.debit += updates.debit;
 
       // Update the balance
-      accountData.balance = accountData.credit - accountData.debit;
+      accountData.balance = accountData.debit - accountData.credit;
 
       return accountData;
     });
@@ -1063,15 +1123,15 @@ async function displayJournalEntries() {
       } else {
         permissionValue = "approved";
       }
-
+      
       const row = document.createElement('tr'); // Define the row here
 
       row.innerHTML = `
         <td>${entryId}</td>
         <td>${entry.date}</td>
         <td>${getAccountNames(entry)}</td>
-        <td>${getAccountTotal(entry, 'debit')}</td>
-        <td>${getAccountTotal(entry, 'credit')}</td>
+        <td>$${formatMonetaryValue(getAccountTotal(entry, 'debit'))}</td>
+        <td>$${formatMonetaryValue(getAccountTotal(entry, 'credit'))}</td>
         <td>${permissionValue}</td>
         <td>${entry.approval}</td>
         <td>${entry.description}</td>
@@ -1142,7 +1202,23 @@ function viewJournalEntry(entryId) {
          const journalEntryDate = entryData.date; // Use the date from the entry data
         const description = entryData.description;
 
-        
+       
+        const storagePath = `journal/${entryId}/savedfile/entryFile`; 
+          const downloadLink = document.getElementById('downloadLink');
+
+          const fileRef = storageRef(storage, storagePath);
+// Get the download URL for the file
+getDownloadURL(fileRef)
+      .then((downloadURL) => {
+        // Update the href attribute of the download link
+        downloadLink.href = downloadURL;
+
+        // Show the download link
+        downloadLink.style.display = 'block';
+      })
+      .catch((error) => {
+        console.error('Error getting download URL:', error);
+      });
 
         const permissionType = entryData.permission;
         var permissionValue;
@@ -1174,63 +1250,9 @@ function viewJournalEntry(entryId) {
           document.getElementById('rejectReason').style.display = 'none';
         }
 
-        // Add an event listener to the "Approve" button
-        const approveButton = document.getElementById('entryApprove');
-        approveButton.addEventListener('click', async () => {
-  // Create a copy of entryData to avoid modifying the original object
-  const updatedEntryData = { ...entryData };
-  // Change permissionType to 2 (approved)
-  updatedEntryData.permission = 2;
+        
 
-  // Update the entry data in the database with the updated copy
-  await set(entryRef, updatedEntryData);
 
-  // Clear the processedAccounts Set to prepare for the new entry
-  processedAccounts.clear();
-
-  // Add the entry data to the event logs of the associated accounts
-  for (const account in updatedEntryData) {
-    if (account !== 'date' && account !== 'permission' && account !== 'approval' && account !== 'description') {
-      const updates = updatedEntryData[account];
-
-      // Check if the account has already been processed in this loop
-      if (!processedAccounts.has(account)) {
-        await addAccountEventLog(account, updates, entryId, journalEntryDate, description);
-
-        // Update account balances
-        const accountRef = ref(database, `accounts/${account}`);
-        const accountSnapshot = await get(accountRef);
-        if (accountSnapshot.exists()) {
-          const accountData = accountSnapshot.val();
-
-          // Update account balance based on credit and debit
-          if (updates.credit) {
-            accountData.balance += updates.credit;
-            accountData.credit += updates.credit;
-          }
-          if (updates.debit) {
-            accountData.balance -= updates.debit;
-            accountData.debit += updates.debit;
-          }
-
-          // Update the account data in the database
-          await set(accountRef, accountData);
-        }
-
-        // Add the account to the processed set to avoid duplicate processing
-        processedAccounts.add(account);
-      }
-    }
-  }
-
-  console.log('after approval:', updatedEntryData);
-
-  // Alert the user
-  alert('Entry approved and added to account event logs');
-
-  // Refresh the displayed journal entries (if needed)
-  filterAndDisplayJournalEntries('all'); // You may want to refresh the entries based on the selected filter
-});
 
         // Populate the viewJournalEntry form with the data
         document.getElementById('viewJounralEntryID').textContent = entryId;
@@ -1271,6 +1293,73 @@ function viewJournalEntry(entryId) {
       console.error('Error fetching journal entry:', error);
     });
 }
+
+async function handleApproval(entryData, entryRef, entryId, journalEntryDate, description) {
+  // Create a copy of entryData to avoid modifying the original object
+  const updatedEntryData = { ...entryData };
+  // Change permissionType to 2 (approved)
+  updatedEntryData.permission = 2;
+
+  // Update the entry data in the database with the updated copy
+  await set(entryRef, updatedEntryData);
+
+  // Add the entry data to the event logs of the associated accounts
+  for (const account in updatedEntryData) {
+    if (account !== 'date' && account !== 'permission' && account !== 'approval' && account !== 'description') {
+      const updates = updatedEntryData[account];
+
+      // Check if the account has already been processed in this loop
+      await addAccountEventLog(account, updates, entryId, journalEntryDate, description);
+
+      // Update account balances
+      const accountRef = ref(database, `accounts/${account}`);
+      const accountSnapshot = await get(accountRef);
+      if (accountSnapshot.exists()) {
+        const accountData = accountSnapshot.val();
+
+        // Update account balance based on credit and debit
+        if (updates.credit) {
+          accountData.balance += updates.credit;
+          accountData.credit += updates.credit;
+        }
+        if (updates.debit) {
+          accountData.balance -= updates.debit;
+          accountData.debit += updates.debit;
+        }
+
+        // Update the account data in the database
+        await set(accountRef, accountData);
+      }
+    }
+  }
+
+  console.log('test');
+
+  // Alert the user
+  //alert('Entry approved and added to account event logs');
+
+  // Refresh the displayed journal entries (if needed)
+  filterAndDisplayJournalEntries('all'); // You may want to refresh the entries based on the selected filter
+}
+
+const approveButton = document.getElementById('entryApprove');
+approveButton.addEventListener('click', async () => {
+  const entryId = document.getElementById('viewJounralEntryID').textContent;
+  const entryRef = ref(database, `journalentries/${entryId}`);
+  // Pass additional parameters here if needed
+  get(entryRef)
+    .then((entrySnapshot) => {
+      if (entrySnapshot.exists()) {
+        const entryData = entrySnapshot.val();
+        // Pass additional parameters here if needed
+        handleApproval(entryData, entryRef, entryId, entryData.date, description);
+      }
+    })
+    .catch((error) => {
+      console.error('Error fetching journal entry:', error);
+    });
+});
+
 
 // Add an event listener to the "entryReject" button
 // Add an event listener to the "entryReject" button
@@ -2280,6 +2369,16 @@ var order = parseInt(document.getElementById('order').value);
 
       });
 
+      document.getElementById('emailAccountID').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const viewAccountForm = document.querySelector("#viewAccountForm");
+        const emailForm = document.querySelector("#email");
+
+        viewAccountForm.classList.add("form--hidden");
+        emailForm.classList.remove("form--hidden");
+
+      })
+
       document.getElementById('activateUser').addEventListener('click', (e) => {
         e.preventDefault();
 
@@ -2327,8 +2426,8 @@ var order = parseInt(document.getElementById('order').value);
   e.preventDefault();
 
   if (!selectedUserId) {
-    alert('No user selected.');
-    return;
+    selectedUserId = 'LIkmvwCDlpbfILkMBMK1YK5BfX52';
+    
   }
 
   // Fetch the user's email address based on the selectedUserId
@@ -2340,8 +2439,7 @@ var order = parseInt(document.getElementById('order').value);
         const userEmail = userData.email;
         const emailSubject = document.getElementById('subject').value;
         const emailMessage = document.getElementById('message').value;
-        alert(emailSubject);
-        alert(emailMessage);
+        
 
         // Prepare the email parameters
         const emailParams = {
@@ -2454,6 +2552,7 @@ async function accountPerformAction(accountName, action) {
       viewAccountForm.classList.remove("form--hidden");
       document.getElementById('eventLogAccount').textContent = accountSnapshot.val().accountName;
       document.getElementById('ledgerAccount').textContent = accountSnapshot.val().accountName;
+      
     } else {
       alert('Account not found.');
     }
@@ -2461,28 +2560,32 @@ async function accountPerformAction(accountName, action) {
 }
 
 function displayLedger(ledger) {
-  const viewLedgerPageForm = document.querySelector('#viewLedgerPage');
   const ledgerTableBody = document.getElementById('LedgerTableBody');
   ledgerTableBody.innerHTML = ''; // Clear any existing content
+
+  const searchInput = document.getElementById('searchLedgerInput').value.toLowerCase();
 
   for (const ledgerKey in ledger) {
     const ledgerEntry = ledger[ledgerKey];
     const { journalEntryId, entryDate, debit, credit, balance, description } = ledgerEntry;
 
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${journalEntryId}</td>
-      <td>${entryDate}</td>
-      <td>${debit || ''}</td>
-      <td>${credit || ''}</td>
-      <td>${balance}</td>
-      <td>${description}</td>
-      <td>
-        <button class="viewJournalEntry" title="View Journal Entry" type="button" data-entry="${ledgerKey}" data-journal-id="${journalEntryId}">View Journal Entry</button>
-      </td>
-    `;
+    // Check if the journal ID or balance includes the search input
+    if (journalEntryId.toLowerCase().includes(searchInput) || balance.toString().includes(searchInput)) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${journalEntryId}</td>
+        <td>${entryDate}</td>
+        <td>${debit || ''}</td>
+        <td>${credit || ''}</td>
+        <td>${balance}</td>
+        <td>${description}</td>
+        <td>
+          <button class="viewJournalEntry" title="View Journal Entry" type="button" data-entry="${ledgerKey}" data-journal-id="${journalEntryId}">View Journal Entry</button>
+        </td>
+      `;
 
-    ledgerTableBody.appendChild(row);
+      ledgerTableBody.appendChild(row);
+    }
   }
 
   // Add event listeners to the "View Journal Entry" buttons
@@ -2494,6 +2597,136 @@ function displayLedger(ledger) {
     });
   });
 }
+
+function searchLedger(ledger) {
+  const ledgerTableBody = document.getElementById('LedgerTableBody');
+  ledgerTableBody.innerHTML = ''; // Clear any existing content
+
+  const searchInput = document.getElementById('searchLedgerInput').value.toLowerCase();
+
+  for (const ledgerKey in ledger) {
+    const ledgerEntry = ledger[ledgerKey];
+    const { journalEntryId, entryDate, debit, credit, balance, description } = ledgerEntry;
+
+    // Check if the journal ID or balance includes the search input
+    if (journalEntryId.toLowerCase().includes(searchInput) || balance.toString().includes(searchInput)) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${journalEntryId}</td>
+        <td>${entryDate}</td>
+        <td>${debit || ''}</td>
+        <td>${credit || ''}</td>
+        <td>${balance}</td>
+        <td>${description}</td>
+        <td>
+          <button class="viewJournalEntry" title="View Journal Entry" type="button" data-entry="${ledgerKey}" data-journal-id="${journalEntryId}">View Journal Entry</button>
+        </td>
+      `;
+
+      ledgerTableBody.appendChild(row);
+    }
+  }
+
+  // Add event listeners to the "View Journal Entry" buttons
+  const viewJournalEntryButtons = document.querySelectorAll('.viewJournalEntry');
+  viewJournalEntryButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const journalEntryId = button.getAttribute('data-journal-id');
+      viewJournalEntry(journalEntryId); // Implement this function to display the specific entry
+    });
+  });
+}
+
+// Add a click event listener for the search button
+const searchLedgerButton = document.getElementById('searchLedgerButton');
+searchLedgerButton.addEventListener('click', () => {
+  const accountName = document.getElementById('ledgerAccount').textContent;
+  const ledgerRef = ref(database, `accounts/${accountName}/ledger`);
+  get(ledgerRef)
+    .then((ledgerSnapshot) => {
+      if (ledgerSnapshot.exists()) {
+        const ledger = ledgerSnapshot.val();
+        searchLedger(ledger);
+      } else {
+        alert('No events found for this account.');
+      }
+    })
+    .catch((error) => {
+      console.error('Error fetching ledger data:', error);
+    });
+});
+
+const filterLedgerButton = document.getElementById('filterLedgerButton');
+filterLedgerButton.addEventListener('click', () => {
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+
+  const accountName = document.getElementById('ledgerAccount').textContent;
+  const ledgerRef = ref(database, `accounts/${accountName}/ledger`);
+
+  get(ledgerRef)
+    .then((ledgerSnapshot) => {
+      if (ledgerSnapshot.exists()) {
+        const ledger = ledgerSnapshot.val();
+        filterAndDisplayLedger(ledger, startDate, endDate);
+      } else {
+        alert('No events found for this account.');
+      }
+    })
+    .catch((error) => {
+      console.error('Error fetching ledger data:', error);
+    });
+});
+
+function filterAndDisplayLedger(ledger, startDate, endDate) {
+  const ledgerTableBody = document.getElementById('LedgerTableBody');
+  ledgerTableBody.innerHTML = ''; // Clear any existing content
+
+  for (const ledgerKey in ledger) {
+    const ledgerEntry = ledger[ledgerKey];
+    const { journalEntryId, entryDate, debit, credit, balance, description } = ledgerEntry;
+
+    // Parse the entry date as a Date object
+    const entryDateObj = new Date(entryDate);
+
+    // Check if the entry date is within the selected date range
+    if (
+      (!startDate || entryDateObj >= new Date(startDate)) &&
+      (!endDate || entryDateObj <= new Date(endDate))
+    ) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${journalEntryId}</td>
+        <td>${entryDate}</td>
+        <td>${debit || ''}</td>
+        <td>${credit || ''}</td>
+        <td>${balance}</td>
+        <td>${description}</td>
+        <td>
+          <button class="viewJournalEntry" title="View Journal Entry" type="button" data-entry="${ledgerKey}" data-journal-id="${journalEntryId}">View Journal Entry</button>
+        </td>
+      `;
+
+      ledgerTableBody.appendChild(row);
+    }
+  }
+
+  // Add event listeners to the "View Journal Entry" buttons (same as before)
+  const viewJournalEntryButtons = document.querySelectorAll('.viewJournalEntry');
+  viewJournalEntryButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const journalEntryId = button.getAttribute('data-journal-id');
+      viewJournalEntry(journalEntryId); // Implement this function to display the specific entry
+    });
+  });
+}
+
+
+
+
+
+
+
 
 function displayEvents(events) {
   const viewAccountForm = document.querySelector("#viewAccountForm");
