@@ -1319,11 +1319,11 @@ async function handleApproval(entryData, entryRef, entryId, journalEntryDate, de
 
         // Update account balance based on credit and debit
         if (updates.credit) {
-          accountData.balance += updates.credit;
+          accountData.balance -= updates.credit;
           accountData.credit += updates.credit;
         }
         if (updates.debit) {
-          accountData.balance -= updates.debit;
+          accountData.balance += updates.debit;
           accountData.debit += updates.debit;
         }
 
