@@ -87,6 +87,7 @@
 
   <form class="form form--hidden" id="journalPage">
     <button class="form__button" id="createJournalButton" type="button" title="Create Entries">Create Entries</button>
+    <h1 id="tableHeader">Normal Entries</h1>
     <div class="form__input-group">
       <input type="text" id="searchJournalsInput" class="form__input" placeholder="Search Journals by Account Name">
     <div class="form__input--error-message"></div>
@@ -110,6 +111,7 @@
       </thead>
 
       <tbody id="JournalTableBody"></tbody>
+      <tbody id="AdjustedTableBody" class="hidden"></tbody>
     </table>
 
     <div id="statusFilter">
@@ -127,6 +129,8 @@
         <input type="radio" name="status" value="rejected"> Rejected
       </label>
     </div>
+
+    <button class="form__button" id="changeAdjustedEntry" type="button" title="Show Adjusted Entries">Show Adjusted Entries</button>
 
   </form>
 
@@ -157,6 +161,14 @@
       <div class="form__input--error-message"></div>
     </div>
     <input type="file" id="fileInput" accept=".pdf, .csv, .docx, .jpg, .png, .xlsx" />
+    <div class="form__radio-group">
+      <label>
+        <input type="radio" name="journalType" value="normal" checked> Normal
+      </label>
+      <label>
+        <input type="radio" name="journalType" value="adjusted"> Adjusted
+      </label>
+    </div>
     <button type="button" id="addRow">Add Row</button>
     <button type="button" id="clearForm">Clear</button>
     <button type="submitJournalEntry">Submit</button>
@@ -733,6 +745,29 @@
         
     });
 
+    const changeAdjustedEntryButton = document.getElementById('changeAdjustedEntry');
+    const journalTableBody = document.getElementById('JournalTableBody');
+    const adjustedTableBody = document.getElementById('AdjustedTableBody');
+    const tableHeader = document.getElementById('tableHeader'); // Get a reference to the header element
+
+    let isAdjustedTableVisible = false;
+
+    changeAdjustedEntryButton.addEventListener('click', () => {
+      isAdjustedTableVisible = !isAdjustedTableVisible; // Toggle the visibility
+
+      if (isAdjustedTableVisible) {
+        journalTableBody.classList.add('hidden'); // Hide the original table
+        adjustedTableBody.classList.remove('hidden'); // Show the adjusted table
+        changeAdjustedEntryButton.textContent = 'Show Normal Entries'; // Change the button text
+        tableHeader.textContent = 'Adjusted Entries'; // Change the header text
+      } else {
+        journalTableBody.classList.remove('hidden'); // Show the original table
+        adjustedTableBody.classList.add('hidden'); // Hide the adjusted table
+        changeAdjustedEntryButton.textContent = 'Show Adjusted Entries'; // Change the button text
+        tableHeader.textContent = 'Normal Entries'; // Change the header text
+      }
+    });
+
 
     document.querySelectorAll(".form__input").forEach(inputElement => {
             inputElement.addEventListener("blur", e => {
@@ -814,6 +849,7 @@
         const submitButton = form.querySelector('button[type="submitJournalEntry"]');
         const tbody = form.querySelector('tbody');
         const clearButton = document.getElementById('clearForm');
+        
 
         // Function to add a new row to the table
         function addRow() {
@@ -834,7 +870,13 @@
         clearButton.addEventListener('click', clearForm);
 
 
-
+        let entryType = "Normal"; // Declare entryType globally
+        const radioButtons = document.querySelectorAll('input[name="journalType"]');
+          radioButtons.forEach((radioButton) => {
+            radioButton.addEventListener('change', (event) => {
+              entryType = event.target.value; // Update the entryType based on the selected radio button value
+            });
+          });
         //adding to database
         // Function to submit a journal entry to the database
         async function submitJournalEntry(event) {
@@ -933,6 +975,7 @@
   journalData['permission'] = 1;
   journalData['approval'] = userIDHolder;
   journalData['description'] = journalDescription;
+  journalData['EntryType'] = entryType;
 
   // Create a reference to the "journalentries" with the unique ID
   const newEntryRef = ref(database, `journalentries/${uniqueId}`);
@@ -1194,7 +1237,7 @@ function getAccountTotal(entry, accountType) {
 
 
 // Call the function to initially display journal entries
-displayJournalEntries();
+//displayJournalEntries();
 
 
 //---------------------------------------------------------------------------------------------------------
@@ -1483,7 +1526,9 @@ async function searchJournals() {
 // Function to filter and display journal entries based on status
 function filterAndDisplayJournalEntries(status) {
   const tableBody = document.getElementById('JournalTableBody');
+  const adjustedTableBody = document.getElementById('AdjustedTableBody'); // New table body for adjusted entries
   tableBody.innerHTML = ''; // Clear the existing table rows
+  adjustedTableBody.innerHTML = ''; // Clear the existing adjusted table rows
 
   // Retrieve the journal entries from the database
   const journalEntriesRef = ref(database, 'journalentries');
@@ -1513,8 +1558,8 @@ function filterAndDisplayJournalEntries(status) {
             <td>${entryId}</td>
             <td>${entry.date}</td>
             <td>${getAccountNames(entry)}</td>
-            <td>${getAccountTotal(entry, 'debit')}</td>
-            <td>${getAccountTotal(entry, 'credit')}</td>
+            <td>$${formatMonetaryValue(getAccountTotal(entry, 'debit'))}</td>
+            <td>$${formatMonetaryValue(getAccountTotal(entry, 'credit'))}</td>
             <td>${permissionValue}</td>
             <td>${entry.approval}</td>
             <td>${entry.description}</td>
@@ -1527,7 +1572,12 @@ function filterAndDisplayJournalEntries(status) {
             viewJournalEntry(entryId); // Call a function to display the entry when the button is clicked
           });
 
-          tableBody.appendChild(row);
+          // Check EntryType for separation into different table bodies
+          if (entry.EntryType === "Normal") {
+            tableBody.appendChild(row);
+          } else if (entry.EntryType === "adjusted") {
+            adjustedTableBody.appendChild(row);
+          }
         }
       });
     } else {

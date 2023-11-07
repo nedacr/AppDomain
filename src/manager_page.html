@@ -23,8 +23,67 @@
     <h2>Main Content</h2>
     <p>This is the main content of your webpage contained within a container.</p>
     <p>Content Goes Here</p>
+
+    <input type="date" id="startDateInput">
+    <input type="date" id="endDateInput">
+    <button class="form__button" id="viewTrialBalance" type="button" title="Show Trial Balance Sheet">Show Trial Balance</button>
+    <button class="form__button" id="viewBlanceSheet" type="button" title="Show Balance Sheet">Show Balance Sheet</button>
+
     
   </form>
+
+  <form class="form form--hidden" id="trialBalancePage">
+    <h1>Trial Balance Sheet</h1>
+
+    <table id="trialBalanceTable">
+      <thead>
+        <tr>
+          <th colspan="3">Trial Balance Sheet</th>
+        </tr>
+        <tr>
+          <th>Account</th>
+          <th>Debit</th>
+          <th>Credit</th>
+        </tr>
+      </thead>
+
+      <tbody id="trialBalanceTableBody"></tbody>
+    </table>
+
+    <button class="form__button" id="DownloadTrialBalance" type="button" title="Save Trial Balance Sheet">Save Trial Balance</button>
+    <button class="form__button" id="EmailTrialBalance" type="button" title="Email Trial Balance Sheet">email Trial Balance</button>
+    <button class="form__button" id="PrintTrialBalance" type="button" title="Print Trial Balance Sheet">Print Trial Balance</button>
+  </form>
+
+  <form class="form form--hidden" id="BalancePage">
+    <h1>Trial Balance Sheet</h1>
+
+    <table id="trialBalanceTable">
+      <thead>
+        <tr>
+          <th colspan="4">Trial Balance Sheet</th>
+        </tr>
+        <tr>
+          <th colspan="2">Assets</th>
+          <th colspan="2">liabilities</th>
+        </tr>
+        <tr>
+          <th>Account</th>
+          <th>Debit</th>
+          <th>Account</th>
+          <th>Credit</th>
+        </tr>
+      </thead>
+
+      <tbody id="trialBalanceTableBody"></tbody>
+    </table>
+
+    <button class="form__button" id="DownloadBalance" type="button" title="Save Balance Sheet">Save Balance</button>
+    <button class="form__button" id="EmailBalance" type="button" title="Email Balance Sheet">email Balance</button>
+    <button class="form__button" id="PrintBalance" type="button" title="Print Balance Sheet">Print Balance</button>
+  </form>
+
+
   <form class="form form--hidden" id="tableForm">
     <table>
       <thead>
@@ -87,7 +146,7 @@
 
   <form class="form form--hidden" id="journalPage">
     <button class="form__button" id="createJournalButton" type="button" title="Create Entries">Create Entries</button>
-    <h1>Approved Entries</h1>
+    <h1 id="tableHeader">Normal Entries</h1>
     <div class="form__input-group">
       <input type="text" id="searchJournalsInput" class="form__input" placeholder="Search Journals by Account Name">
     <div class="form__input--error-message"></div>
@@ -111,6 +170,7 @@
       </thead>
 
       <tbody id="JournalTableBody"></tbody>
+      <tbody id="AdjustedTableBody" class="hidden"></tbody>
     </table>
 
     <div id="statusFilter">
@@ -129,7 +189,10 @@
       </label>
     </div>
 
+    <button class="form__button" id="changeAdjustedEntry" type="button" title="Show Adjusted Entries">Show Adjusted Entries</button>
+
   </form>
+
 
   <form class="form form--hidden" id="createJournal">
     <table>
@@ -158,6 +221,14 @@
       <div class="form__input--error-message"></div>
     </div>
     <input type="file" id="fileInput" accept=".pdf, .csv, .docx, .jpg, .png, .xlsx" />
+    <div class="form__radio-group">
+      <label>
+        <input type="radio" name="journalType" value="normal" checked> Normal
+      </label>
+      <label>
+        <input type="radio" name="journalType" value="adjusted"> Adjusted
+      </label>
+    </div>
     <button type="button" id="addRow">Add Row</button>
     <button type="button" id="clearForm">Clear</button>
     <button type="submitJournalEntry">Submit</button>
@@ -540,6 +611,7 @@
   
   <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.js"></script>
 
 
   <script type="module">
@@ -597,6 +669,7 @@
         const journalPageFrom = document.querySelector('#journalPage');
         const viewJournalEntryForm = document.querySelector('#viewJournalEntry');
         const viewLedgerPageForm = document.querySelector('#viewLedgerPage');
+        
 
     
         //on click hides hides create new account and unhides mainpage
@@ -733,8 +806,174 @@
 
         
     });
+//-------------------------------------------------------------------------------------------------------------
+//adjustable changes   
+const changeAdjustedEntryButton = document.getElementById('changeAdjustedEntry');
+    const journalTableBody = document.getElementById('JournalTableBody');
+    const adjustedTableBody = document.getElementById('AdjustedTableBody');
+    const tableHeader = document.getElementById('tableHeader'); // Get a reference to the header element
 
+    let isAdjustedTableVisible = false;
 
+    changeAdjustedEntryButton.addEventListener('click', () => {
+      isAdjustedTableVisible = !isAdjustedTableVisible; // Toggle the visibility
+
+      if (isAdjustedTableVisible) {
+        journalTableBody.classList.add('hidden'); // Hide the original table
+        adjustedTableBody.classList.remove('hidden'); // Show the adjusted table
+        changeAdjustedEntryButton.textContent = 'Show Normal Entries'; // Change the button text
+        tableHeader.textContent = 'Adjusted Entries'; // Change the header text
+      } else {
+        journalTableBody.classList.remove('hidden'); // Show the original table
+        adjustedTableBody.classList.add('hidden'); // Hide the adjusted table
+        changeAdjustedEntryButton.textContent = 'Show Adjusted Entries'; // Change the button text
+        tableHeader.textContent = 'Normal Entries'; // Change the header text
+      }
+    });
+//---------------------------------------------------------------------------------------------------
+//trial balance sheet
+
+const viewTrialBalanceButton = document.getElementById('viewTrialBalance');
+const mainPageForm = document.getElementById('mainPage');
+const trialBalancePage = document.getElementById('trialBalancePage');
+const trialBalanceTableBody = document.getElementById('trialBalanceTableBody');
+const table = document.getElementById('trialBalanceTable');
+
+// Add an event listener to the "View Trial Balance" button
+viewTrialBalanceButton.addEventListener('click', () => {
+    mainPageForm.classList.add('form--hidden'); // Hide the main page
+    trialBalancePage.classList.remove('form--hidden'); // Show the trial balance page
+    populateTrialBalance(); // Populate the trial balance table
+});
+
+async function populateTrialBalance() {
+  const startDateInput = document.getElementById('startDateInput');
+  const endDateInput = document.getElementById('endDateInput');
+
+  const startDate = new Date(startDateInput.value);
+  const endDate = new Date(endDateInput.value);
+
+  const accountsRef = ref(database, 'accounts');
+  const accountsSnapshot = await get(accountsRef);
+
+  if (accountsSnapshot.exists()) {
+    const accountsData = accountsSnapshot.val();
+
+    const trialBalanceTableBody = document.getElementById('trialBalanceTableBody');
+    trialBalanceTableBody.innerHTML = '';  // Clear previous data in the table
+
+    let totalDebit = 0;
+    let totalCredit = 0;
+
+    for (const accountName in accountsData) {
+      const accountData = accountsData[accountName];
+      const { debit, credit, date } = accountData;
+
+      // Parse the date in the account data into a valid Date object
+      const accountDate = new Date(date);
+
+      // Check if the account date is within the specified range
+      if (accountDate >= startDate && accountDate <= endDate) {
+        const tableRow = document.createElement('tr');
+        tableRow.innerHTML = `
+          <td>${accountName}</td>
+          <td>$${formatMonetaryValue(debit)}</td>
+          <td>$${formatMonetaryValue(credit)}</td>
+        `;
+
+        trialBalanceTableBody.appendChild(tableRow);
+
+        // Update the total credits and debits
+        totalDebit += debit;
+        totalCredit += credit;
+      }
+    }
+
+    // Create the last row with the total values
+    const totalRow = document.createElement('tr');
+    totalRow.innerHTML = `
+      <td>TOTAL</td>
+      <td>$${formatMonetaryValue(totalDebit)}</td>
+      <td>$${formatMonetaryValue(totalCredit)}</td>
+    `;
+
+    trialBalanceTableBody.appendChild(totalRow);
+  }
+}
+
+const downloadButton = document.getElementById('DownloadTrialBalance');
+
+// Function to trigger the image download
+function downloadTrialBalanceImage() {
+    html2canvas(table).then(function(canvas) {
+        const image = canvas.toDataURL('image/png');
+
+        // Create an anchor element to trigger the download
+        const downloadLink = document.createElement('a');
+        downloadLink.href = image;
+        downloadLink.download = 'trial_balance.png'; // Set the desired filename
+
+        // Simulate a click on the anchor element to trigger the download
+        downloadLink.click();
+    });
+}
+
+// Attach a click event handler to the button
+downloadButton.addEventListener('click', downloadTrialBalanceImage);
+
+const emailButton = document.getElementById('EmailTrialBalance');
+
+// Function to trigger the sned image email
+function emailTrialBalanceImage() {
+  html2canvas(table).then(function(canvas) {
+    const image = canvas.toDataURL('image/png');
+
+    const imageBase64 = image.split(',')[1];
+
+    const emailInfo = {
+        to_email: 'robertsoncaden02@gmail.com',
+        subject: 'Trial Balance Sheet',
+        message: 'Here is a picture of the Trial Balance Sheet (This does work, but I do not want to spend money for attachments)',
+        attachment: imageBase64
+    };
+
+    emailjs.send('service_uhjncdn', 'template_57xcxk7', emailInfo)
+           .then((response) => {
+             alert('Email sent successfully!', response);
+            })
+            .catch((error) => {
+              alert('Error sending email:', error);
+            });
+  });
+}
+
+emailButton.addEventListener('click', emailTrialBalanceImage);
+
+const printButton = document.getElementById('PrintTrialBalance')
+
+function printTrialBalanceImage() {
+  html2canvas(table).then(function (canvas) {
+    const image = canvas.toDataURL('image/png');
+
+    // Create a new window to display the image for printing
+    const printWindow = window.open('', '', 'width=600,height=600');
+    printWindow.document.open();
+    printWindow.document.write(
+      `<img src="${image}" style="width:100%;" />`
+    );
+    printWindow.document.close();
+
+    // Wait for the image to load before triggering the print
+    printWindow.addEventListener('load', function () {
+      printWindow.print();
+      printWindow.close();
+    });
+  });
+}
+
+// Add a click event listener to the "Print Trial Balance" button
+printButton.addEventListener('click', printTrialBalanceImage);
+//-----------------------------------------------------------------------------------------------------------
     document.querySelectorAll(".form__input").forEach(inputElement => {
             inputElement.addEventListener("blur", e => {
                 if (e.target.id === "realPassword" && e.target.value.length > 0 && e.target.value.length < 8) {
@@ -815,6 +1054,7 @@
         const submitButton = form.querySelector('button[type="submitJournalEntry"]');
         const tbody = form.querySelector('tbody');
         const clearButton = document.getElementById('clearForm');
+        
 
         // Function to add a new row to the table
         function addRow() {
@@ -835,10 +1075,17 @@
         clearButton.addEventListener('click', clearForm);
 
 
+        let entryType = "Normal"; // Declare entryType globally
+        const radioButtons = document.querySelectorAll('input[name="journalType"]');
+radioButtons.forEach((radioButton) => {
+  radioButton.addEventListener('change', (event) => {
+    entryType = event.target.value; // Update the entryType based on the selected radio button value
+  });
+});
 
         //adding to database
         // Function to submit a journal entry to the database
-        async function submitJournalEntry(event) {
+async function submitJournalEntry(event) {
   event.preventDefault(); // Prevent the default form submission behavior
 
 
@@ -934,6 +1181,7 @@
   journalData['permission'] = 2;
   journalData['approval'] = userIDHolder;
   journalData['description'] = journalDescription;
+  journalData['EntryType'] = entryType;
 
   // Create a reference to the "journalentries" with the unique ID
   const newEntryRef = ref(database, `journalentries/${uniqueId}`);
@@ -1155,7 +1403,7 @@ async function displayJournalEntries() {
 // Helper function to get account names separated by commas
 function getAccountNames(entry) {
   return Object.keys(entry)
-    .filter(key => key !== 'date' && key !== 'permission' && key !== 'approval' && key !== 'description')
+    .filter(key => key !== 'date' && key !== 'permission' && key !== 'approval' && key !== 'description' && key !== 'EntryType')
     .join(', ');
 }
 
@@ -1177,7 +1425,7 @@ function getAccountTotal(entry, accountType) {
 
 
 // Call the function to initially display journal entries
-displayJournalEntries();
+//displayJournalEntries();
 
 
 //---------------------------------------------------------------------------------------------------------
@@ -1466,7 +1714,9 @@ async function searchJournals() {
 // Function to filter and display journal entries based on status
 function filterAndDisplayJournalEntries(status) {
   const tableBody = document.getElementById('JournalTableBody');
+  const adjustedTableBody = document.getElementById('AdjustedTableBody'); // New table body for adjusted entries
   tableBody.innerHTML = ''; // Clear the existing table rows
+  adjustedTableBody.innerHTML = ''; // Clear the existing adjusted table rows
 
   // Retrieve the journal entries from the database
   const journalEntriesRef = ref(database, 'journalentries');
@@ -1496,8 +1746,8 @@ function filterAndDisplayJournalEntries(status) {
             <td>${entryId}</td>
             <td>${entry.date}</td>
             <td>${getAccountNames(entry)}</td>
-            <td>${getAccountTotal(entry, 'debit')}</td>
-            <td>${getAccountTotal(entry, 'credit')}</td>
+            <td>$${formatMonetaryValue(getAccountTotal(entry, 'debit'))}</td>
+            <td>$${formatMonetaryValue(getAccountTotal(entry, 'credit'))}</td>
             <td>${permissionValue}</td>
             <td>${entry.approval}</td>
             <td>${entry.description}</td>
@@ -1510,7 +1760,12 @@ function filterAndDisplayJournalEntries(status) {
             viewJournalEntry(entryId); // Call a function to display the entry when the button is clicked
           });
 
-          tableBody.appendChild(row);
+          // Check EntryType for separation into different table bodies
+          if (entry.EntryType === "Normal") {
+            tableBody.appendChild(row);
+          } else if (entry.EntryType === "adjusted") {
+            adjustedTableBody.appendChild(row);
+          }
         }
       });
     } else {

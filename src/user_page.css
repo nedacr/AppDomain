@@ -64,6 +64,10 @@ z-index: 1000;
    display: none; 
 }
 
+.hidden {
+  display: none;
+}
+
 .form > *:first-child {
     margin-top: 0;
 }

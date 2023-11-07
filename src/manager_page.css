@@ -53,6 +53,15 @@ z-index: 1000;
   overflow-y: auto; /* Enable vertical scrolling if content exceeds container height */
 }
 
+.form__radio-group label {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.form__radio-group input[type="radio"] {
+  margin-right: 5px;
+}
+
 
 .container,
 .form__input,
@@ -62,6 +71,10 @@ z-index: 1000;
 
 .form--hidden {
    display: none; 
+}
+
+.hidden {
+  display: none;
 }
 
 .form > *:first-child {
