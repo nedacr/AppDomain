@@ -41,8 +41,8 @@ z-index: 1000;
 }
 
 .container {
-  width: 1000px;
-  max-width: 1000px;
+  width: 1400px;
+  max-width: 2000px;
   margin: 100px auto 1rem; /* Adjusted top margin to accommodate the banner height */
   padding: 2rem;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
@@ -51,6 +51,15 @@ z-index: 1000;
   height: calc(100vh - 100px); /* Adjusted height to fit within viewport excluding banner */
   box-sizing: border-box;
   overflow-y: auto; /* Enable vertical scrolling if content exceeds container height */
+}
+
+.form__radio-group label {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.form__radio-group input[type="radio"] {
+  margin-right: 5px;
 }
 
 
@@ -62,6 +71,10 @@ z-index: 1000;
 
 .form--hidden {
    display: none; 
+}
+
+.hidden {
+  display: none;
 }
 
 .form > *:first-child {

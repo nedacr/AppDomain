@@ -41,8 +41,8 @@ z-index: 1000;
 }
 
 .container {
-  width: 1000px;
-  max-width: 1000px;
+  width: 1400px;
+  max-width: 2000px;
   margin: 100px auto 1rem; /* Adjusted top margin to accommodate the banner height */
   padding: 2rem;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
@@ -62,6 +62,10 @@ z-index: 1000;
 
 .form--hidden {
    display: none; 
+}
+
+.hidden {
+  display: none;
 }
 
 .form > *:first-child {
