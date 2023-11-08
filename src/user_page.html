@@ -23,8 +23,106 @@
     <h2>Main Content</h2>
     <p>This is the main content of your webpage contained within a container.</p>
     <p>Content Goes Here</p>
+
+    <input type="date" id="startDateInput">
+    <input type="date" id="endDateInput">
+    <button class="form__button" id="viewTrialBalance" type="button" title="Show Trial Balance Sheet">Show Trial Balance</button>
+    <button class="form__button" id="viewBalanceSheet" type="button" title="Show Balance Sheet">Show Balance Sheet</button>
+    <button class="form__button" id="viewIncomeStatement" type="button" title="Show Income Statement">Show Income Statement</button>
+    <button class="form__button" id="viewRetainedEarnings" type="button" title="Show Retained Earnings">Show Retained Earnings</button>
+
     
   </form>
+
+  <form class="form form--hidden" id="trialBalancePage">
+    <h1>Trial Balance Sheet</h1>
+
+    <table id="trialBalanceTable">
+      <thead>
+        <tr>
+          <th colspan="3">Trial Balance Sheet</th>
+        </tr>
+        <tr>
+          <th>Account</th>
+          <th>Debit</th>
+          <th>Credit</th>
+        </tr>
+      </thead>
+
+      <tbody id="trialBalanceTableBody"></tbody>
+    </table>
+
+    <button class="form__button" id="DownloadTrialBalance" type="button" title="Save Trial Balance Sheet">Save Trial Balance</button>
+    <button class="form__button" id="EmailTrialBalance" type="button" title="Email Trial Balance Sheet">email Trial Balance</button>
+    <button class="form__button" id="PrintTrialBalance" type="button" title="Print Trial Balance Sheet">Print Trial Balance</button>
+  </form>
+
+  <form class="form form--hidden" id="BalancePage">
+    <h1>Balance Sheet</h1>
+
+    <table id="balanceTable">
+      <thead>
+        <tr>
+          <th colspan="6">Balance Sheet</th>
+        </tr>
+        <tr>
+          <th colspan="3">Assets</th>
+          <th colspan="3">liabilities</th>
+        </tr>
+        <tr>
+          <th>Account</th>
+          <th>Debit</th>
+          <th>Credit</th>
+          <th>Account</th>
+          <th>Debit</th>
+          <th>Credit</th>
+        </tr>
+      </thead>
+
+      <tbody id="BalanceTableBody"></tbody>
+    </table>
+
+    <button class="form__button" id="DownloadBalance" type="button" title="Save Balance Sheet">Save Balance</button>
+    <button class="form__button" id="EmailBalance" type="button" title="Email Balance Sheet">email Balance</button>
+    <button class="form__button" id="PrintBalance" type="button" title="Print Balance Sheet">Print Balance</button>
+  </form>
+
+  <form class="form form--hidden" id="IncomeStatementPage">
+    <h1>Income Statement Sheet</h1>
+
+    <table id="IncomeStatementTable">
+      <thead>
+        <tr>
+          <th colspan="2">Income Statement Sheet</th>
+        </tr>
+        <tr>
+          <th colspan="2">Revenue</th>
+        </tr>
+        <tr>  
+          <th>Account</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody id="IncomeStatementTableBody"></tbody>
+      <thead>
+        <tr>
+          <th colspan="2">Expense</th>
+        </tr>
+      </thead>
+      <tbody id="IncomeStatementExpenseTableBody" ></tbody>
+      <thead>
+        <tr>
+          <th colspan="2">Total</th>
+        </tr>
+      </thead>
+      <tbody id="IncomeStatementTotalTableBody"></tbody>
+    </table>
+
+    <button class="form__button" id="DownloadIncomeStatement" type="button" title="Save Balance Sheet">Save Income Statement</button>
+    <button class="form__button" id="EmailIncomeStatement" type="button" title="Email Balance Sheet">email Income Statement</button>
+    <button class="form__button" id="PrintIncomeStatement" type="button" title="Print Balance Sheet">Print Income Statement</button>
+  </form>
+
   <form class="form form--hidden" id="tableForm">
     <table>
       <thead>
@@ -593,7 +691,7 @@
 
 
     document.addEventListener("DOMContentLoaded", () => {
-        const mainForm = document.querySelector("#mainPage");
+      const mainForm = document.querySelector("#mainPage");
         const createNewAccountForm = document.querySelector("#createNewAccount");
         const updateAccountForm = document.querySelector("#updateAccount");
         const emailForm = document.querySelector("#email");
@@ -608,6 +706,9 @@
         const journalPageFrom = document.querySelector('#journalPage');
         const viewJournalEntryForm = document.querySelector('#viewJournalEntry');
         const viewLedgerPageForm = document.querySelector('#viewLedgerPage');
+        const trialBalancePageForm = document.querySelector('#trialBalancePage');
+        const balancePageForm = document.querySelector('#BalancePage');
+        const IncomeStatementPageForm = document.querySelector('#IncomeStatementPage');
 
     
         //on click hides hides create new account and unhides mainpage
@@ -644,6 +745,9 @@
           createJournalForm.classList.add("form--hidden");
           viewJournalEntryForm.classList.add("form--hidden");
           viewLedgerPageForm.classList.add("form--hidden");
+          trialBalancePageForm.classList.add("form--hidden");
+          balancePageForm.classList.add("form--hidden");
+          IncomeStatementPageForm.classList.add("form--hidden");
         });
 
         document.querySelector("#accountsButton").addEventListener("click", e => {
@@ -663,6 +767,9 @@
           createJournalForm.classList.add("form--hidden");
           viewJournalEntryForm.classList.add("form--hidden");
           viewLedgerPageForm.classList.add("form--hidden");
+          trialBalancePageForm.classList.add("form--hidden");
+          balancePageForm.classList.add("form--hidden");
+          IncomeStatementPageForm.classList.add("form--hidden");
         });
 
         document.querySelector("#journalButton").addEventListener("click", e => {
@@ -682,6 +789,9 @@
           createJournalForm.classList.add("form--hidden");
           viewJournalEntryForm.classList.add("form--hidden");
           viewLedgerPageForm.classList.add("form--hidden");
+          trialBalancePageForm.classList.add("form--hidden");
+          balancePageForm.classList.add("form--hidden");
+          IncomeStatementPageForm.classList.add("form--hidden");
         });
 
         
@@ -767,6 +877,505 @@
         tableHeader.textContent = 'Normal Entries'; // Change the header text
       }
     });
+
+    //---------------------------------------------------------------------------------------------------
+//sheet information
+
+const viewTrialBalanceButton = document.getElementById('viewTrialBalance');
+const mainPageForm = document.getElementById('mainPage');
+const trialBalancePage = document.getElementById('trialBalancePage');
+const trialBalanceTableBody = document.getElementById('trialBalanceTableBody');
+const table = document.getElementById('trialBalanceTable');
+const table2 = document.getElementById('balanceTable');
+const table3 = document.getElementById('IncomeStatementTable')
+const viewBalanceSheetButton = document.getElementById('viewBalanceSheet');
+const balancePage = document.getElementById('BalancePage');
+const balanceTableBody = document.getElementById('BalanceTableBody');
+const viewIncomeStatementButton = document.getElementById('viewIncomeStatement');
+const incomeStatementPage = document.getElementById('IncomeStatementPage');
+const incomeStatementTaleBody = document.getElementById('incomeStatementTableBody');
+
+
+
+//----------------------------------------------------------------------------------------------------------
+//trial balance sheet
+
+// Add an event listener to the "View Trial Balance" button
+viewTrialBalanceButton.addEventListener('click', () => {
+    mainPageForm.classList.add('form--hidden'); // Hide the main page
+    trialBalancePage.classList.remove('form--hidden'); // Show the trial balance page
+    populateTrialBalance(); // Populate the trial balance table
+});
+
+async function populateTrialBalance() {
+  const startDateInput = document.getElementById('startDateInput');
+  const endDateInput = document.getElementById('endDateInput');
+
+  const startDate = new Date(startDateInput.value);
+  const endDate = new Date(endDateInput.value);
+
+  const accountsRef = ref(database, 'accounts');
+  const accountsSnapshot = await get(accountsRef);
+
+  if (accountsSnapshot.exists()) {
+    const accountsData = accountsSnapshot.val();
+
+    const trialBalanceTableBody = document.getElementById('trialBalanceTableBody');
+    trialBalanceTableBody.innerHTML = '';  // Clear previous data in the table
+
+    let totalDebit = 0;
+    let totalCredit = 0;
+
+    for (const accountName in accountsData) {
+      const accountData = accountsData[accountName];
+      const { debit, credit, date } = accountData;
+
+      // Parse the date in the account data into a valid Date object
+      const accountDate = new Date(date);
+
+      // Check if the account date is within the specified range
+      if (accountDate >= startDate && accountDate <= endDate) {
+        const tableRow = document.createElement('tr');
+        tableRow.innerHTML = `
+          <td>${accountName}</td>
+          <td>$${formatMonetaryValue(debit)}</td>
+          <td>$${formatMonetaryValue(credit)}</td>
+        `;
+
+        trialBalanceTableBody.appendChild(tableRow);
+
+        // Update the total credits and debits
+        totalDebit += debit;
+        totalCredit += credit;
+      }
+    }
+
+    // Create the last row with the total values
+    const totalRow = document.createElement('tr');
+    totalRow.innerHTML = `
+      <td>TOTAL</td>
+      <td>$${formatMonetaryValue(totalDebit)}</td>
+      <td>$${formatMonetaryValue(totalCredit)}</td>
+    `;
+
+    trialBalanceTableBody.appendChild(totalRow);
+  }
+}
+
+const downloadButton = document.getElementById('DownloadTrialBalance');
+
+// Function to trigger the image download
+function downloadTrialBalanceImage() {
+    html2canvas(table).then(function(canvas) {
+        const image = canvas.toDataURL('image/png');
+
+        // Create an anchor element to trigger the download
+        const downloadLink = document.createElement('a');
+        downloadLink.href = image;
+        downloadLink.download = 'trial_balance.png'; // Set the desired filename
+
+        // Simulate a click on the anchor element to trigger the download
+        downloadLink.click();
+    });
+}
+
+// Attach a click event handler to the button
+downloadButton.addEventListener('click', downloadTrialBalanceImage);
+
+const emailButton = document.getElementById('EmailTrialBalance');
+
+// Function to trigger the sned image email
+function emailTrialBalanceImage() {
+  html2canvas(table).then(function(canvas) {
+    const image = canvas.toDataURL('image/png');
+
+    const imageBase64 = image.split(',')[1];
+
+    const emailInfo = {
+        to_email: 'robertsoncaden02@gmail.com',
+        subject: 'Trial Balance Sheet',
+        message: 'Here is a picture of the Trial Balance Sheet (This does work, but I do not want to spend money for attachments)',
+        attachment: imageBase64
+    };
+
+    emailjs.send('service_uhjncdn', 'template_57xcxk7', emailInfo)
+           .then((response) => {
+             alert('Email sent successfully!', response);
+            })
+            .catch((error) => {
+              alert('Error sending email:', error);
+            });
+  });
+}
+
+emailButton.addEventListener('click', emailTrialBalanceImage);
+
+const printButton = document.getElementById('PrintTrialBalance')
+
+function printTrialBalanceImage() {
+  html2canvas(table).then(function (canvas) {
+    const image = canvas.toDataURL('image/png');
+
+    // Create a new window to display the image for printing
+    const printWindow = window.open('', '', 'width=600,height=600');
+    printWindow.document.open();
+    printWindow.document.write(
+      `<img src="${image}" style="width:100%;" />`
+    );
+    printWindow.document.close();
+
+    // Wait for the image to load before triggering the print
+    printWindow.addEventListener('load', function () {
+      printWindow.print();
+      printWindow.close();
+    });
+  });
+}
+
+// Add a click event listener to the "Print Trial Balance" button
+printButton.addEventListener('click', printTrialBalanceImage);
+//-----------------------------------------------------------------------------------------------------------
+viewBalanceSheetButton.addEventListener('click', () => {
+    mainPageForm.classList.add('form--hidden'); // Hide the main page
+    balancePage.classList.remove('form--hidden'); // Show the balance sheet page
+    populateBalanceSheet(); // Populate the balance sheet table
+});
+
+async function populateBalanceSheet() {
+
+  const startDateInput = document.getElementById('startDateInput');
+  const endDateInput = document.getElementById('endDateInput');
+
+  const startDate = new Date(startDateInput.value);
+  const endDate = new Date(endDateInput.value);
+
+  const accountsRef = ref(database, 'accounts');
+  const accountsSnapshot = await get(accountsRef);
+
+  if (accountsSnapshot.exists()) {
+    const accountsData = accountsSnapshot.val();
+
+    balanceTableBody.innerHTML = '';  // Clear previous data in the table
+
+    const assets = [];
+    const liabilities = [];
+
+    for (const accountName in accountsData) {
+      const accountData = accountsData[accountName];
+      const { debit, credit, category, date } = accountData;
+
+      const accountCreationDate = new Date(date);
+
+      if (category === 'assets' && accountCreationDate >= startDate && accountCreationDate <= endDate) {
+        assets.push({
+          accountName,
+          debit,
+          credit,
+        });
+      } else if (category === 'liabilities' && accountCreationDate >= startDate && accountCreationDate <= endDate) {
+        liabilities.push({
+          accountName,
+          debit,
+          credit,
+        });
+      }
+    }
+
+    const maxRows = Math.max(assets.length, liabilities.length);
+    for (let i = 0; i < maxRows; i++) {
+      const tableRow = document.createElement('tr');
+
+      if (i < assets.length) {
+        const asset = assets[i];
+        tableRow.innerHTML += `
+          <td>${asset.accountName}</td>
+          <td>$${formatMonetaryValue(asset.debit)}</td>
+          <td>$${formatMonetaryValue(asset.credit)}</td>
+        `;
+      } else {
+        tableRow.innerHTML += `
+          <td></td>
+          <td></td>
+          <td></td>
+        `;
+      }
+
+      if (i < liabilities.length) {
+        const liability = liabilities[i];
+        tableRow.innerHTML += `
+          <td>${liability.accountName}</td>
+          <td>$${formatMonetaryValue(liability.debit)}</td>
+          <td>$${formatMonetaryValue(liability.credit)}</td>
+        `;
+      } else {
+        tableRow.innerHTML += `
+          <td></td>
+          <td></td>
+          <td></td>
+        `;
+      }
+
+      balanceTableBody.appendChild(tableRow);
+    }
+
+    // Add a row for total asset and total liability
+    const totalAssetDebit = assets.reduce((total, asset) => total + asset.debit, 0);
+    const totalAssetCredit = assets.reduce((total, asset) => total + asset.credit, 0);
+    const totalLiabilityDebit = liabilities.reduce((total, liability) => total + liability.debit, 0);
+    const totalLiabilityCredit = liabilities.reduce((total, liability) => total + liability.credit, 0);
+
+    const totalRow = document.createElement('tr');
+    totalRow.innerHTML = `
+      <td>TOTAL ASSETS</td>
+      <td>$${formatMonetaryValue(totalAssetDebit)}</td>
+      <td>$${formatMonetaryValue(totalAssetCredit)}</td>
+      <td>TOTAL LIABILITIES</td>
+      <td>$${formatMonetaryValue(totalLiabilityDebit)}</td>
+      <td>$${formatMonetaryValue(totalLiabilityCredit)}</td>
+    `;
+
+    balanceTableBody.appendChild(totalRow);
+  }
+}
+
+const downloadBalanceButton = document.getElementById('DownloadBalance');
+
+// Function to trigger the image download
+function downloadBalanceImage() {
+    html2canvas(table2).then(function(canvas) {
+        const image = canvas.toDataURL('image/png');
+
+        // Create an anchor element to trigger the download
+        const downloadLink = document.createElement('a');
+        downloadLink.href = image;
+        downloadLink.download = 'trial_balance.png'; // Set the desired filename
+
+        // Simulate a click on the anchor element to trigger the download
+        downloadLink.click();
+    });
+}
+
+// Attach a click event handler to the button
+downloadBalanceButton.addEventListener('click', downloadBalanceImage);
+
+const emailBalanceButton = document.getElementById('EmailBalance');
+
+// Function to trigger the sned image email
+function emailBalanceImage() {
+  html2canvas(table2).then(function(canvas) {
+    const image = canvas.toDataURL('image/png');
+
+    const imageBase64 = image.split(',')[1];
+
+    const emailInfo = {
+        to_email: 'robertsoncaden02@gmail.com',
+        subject: 'Trial Balance Sheet',
+        message: 'Here is a picture of the Trial Balance Sheet (This does work, but I do not want to spend money for attachments)',
+        attachment: imageBase64
+    };
+
+    emailjs.send('service_uhjncdn', 'template_57xcxk7', emailInfo)
+           .then((response) => {
+             alert('Email sent successfully!', response);
+            })
+            .catch((error) => {
+              alert('Error sending email:', error);
+            });
+  });
+}
+
+emailBalanceButton.addEventListener('click', emailBalanceImage);
+
+const printBalanceButton = document.getElementById('PrintBalance')
+
+function printBalanceImage() {
+  html2canvas(table2).then(function (canvas) {
+    const image = canvas.toDataURL('image/png');
+
+    // Create a new window to display the image for printing
+    const printWindow = window.open('', '', 'width=600,height=600');
+    printWindow.document.open();
+    printWindow.document.write(
+      `<img src="${image}" style="width:100%;" />`
+    );
+    printWindow.document.close();
+
+    // Wait for the image to load before triggering the print
+    printWindow.addEventListener('load', function () {
+      printWindow.print();
+      printWindow.close();
+    });
+  });
+}
+
+// Add a click event listener to the "Print Trial Balance" button
+printBalanceButton.addEventListener('click', printBalanceImage);
+
+//-----------------------------------------------------------------------------------------------------------
+//income statement sheet
+viewIncomeStatementButton.addEventListener('click', () => {
+    mainPageForm.classList.add('form--hidden'); // Hide the main page
+    incomeStatementPage.classList.remove('form--hidden'); // Show the trial balance page
+    populateIncomeStatement(); // Populate the trial balance table
+});
+
+async function populateIncomeStatement() {
+  const startDateInput = document.getElementById('startDateInput');
+  const endDateInput = document.getElementById('endDateInput');
+
+  const startDate = new Date(startDateInput.value);
+  const endDate = new Date(endDateInput.value);
+
+  const accountsRef = ref(database, 'accounts');
+  const accountsSnapshot = await get(accountsRef);
+
+  if (accountsSnapshot.exists()) {
+    const accountsData = accountsSnapshot.val();
+
+    const incomeStatementTableBody = document.getElementById('IncomeStatementTableBody');
+    const incomeStatementExpenseTableBody = document.getElementById('IncomeStatementExpenseTableBody');
+    const IncomeStatementTotalTableBody = document.getElementById('IncomeStatementTotalTableBody');
+    incomeStatementTableBody.innerHTML = '';  // Clear previous data in the table
+    incomeStatementExpenseTableBody.innerHTML = '';  // Clear previous data in the expense table
+
+    let totalRevenue = 0;
+    let totalExpense = 0;
+
+    const revenueAccounts = [];
+    const expenseAccounts = [];
+
+    for (const accountName in accountsData) {
+      const accountData = accountsData[accountName];
+      const { subCategory, balance, date } = accountData;
+
+      // Parse the date in the account data into a valid Date object
+      const accountDate = new Date(date);
+
+      // Check if the account date is within the specified range
+      if (accountDate >= startDate && accountDate <= endDate) {
+        if (subCategory === 'revenue') {
+          revenueAccounts.push({ accountName, balance });
+        } else if (subCategory === 'expense') {
+          expenseAccounts.push({ accountName, balance });
+        }
+      }
+    }
+
+    // Sort revenue accounts alphabetically
+    revenueAccounts.sort((a, b) => a.accountName.localeCompare(b.accountName));
+
+    // Sort expense accounts alphabetically
+    expenseAccounts.sort((a, b) => a.accountName.localeCompare(b.accountName));
+
+    // Populate the income statement table
+    revenueAccounts.forEach(account => {
+      const tableRow = document.createElement('tr');
+      tableRow.innerHTML = `
+        <td>${account.accountName}</td>
+        <td>$${formatMonetaryValue(account.balance)}</td>
+      `;
+      incomeStatementTableBody.appendChild(tableRow);
+      totalRevenue += account.balance;
+    });
+
+    expenseAccounts.forEach(account => {
+      const tableRow = document.createElement('tr');
+      tableRow.innerHTML = `
+        <td>${account.accountName}</td>
+        <td>$${formatMonetaryValue(account.balance)}</td>
+      `;
+      incomeStatementExpenseTableBody.appendChild(tableRow);
+      totalExpense += account.balance;
+    });
+
+    // Calculate net income (Total Revenue - Total Expense)
+    const netIncome = totalRevenue + totalExpense;
+
+   
+    // Create a row for the net income
+    const netIncomeExpenseRow = document.createElement('tr');
+    netIncomeExpenseRow.innerHTML = `
+      <td>NET INCOME</td>
+      <td>$${formatMonetaryValue(netIncome)}</td>
+    `;
+    IncomeStatementTotalTableBody.appendChild(netIncomeExpenseRow);
+  }
+}
+
+const downloadIncomeStatementButton = document.getElementById('DownloadIncomeStatement');
+
+// Function to trigger the image download
+function downloadIncomeStatementImage() {
+    html2canvas(table3).then(function(canvas) {
+        const image = canvas.toDataURL('image/png');
+
+        // Create an anchor element to trigger the download
+        const downloadLink = document.createElement('a');
+        downloadLink.href = image;
+        downloadLink.download = 'trial_balance.png'; // Set the desired filename
+
+        // Simulate a click on the anchor element to trigger the download
+        downloadLink.click();
+    });
+}
+
+// Attach a click event handler to the button
+downloadIncomeStatementButton.addEventListener('click', downloadIncomeStatementImage);
+
+const emailIncomeStatementButton = document.getElementById('EmailIncomeStatement');
+
+// Function to trigger the sned image email
+function emailIncomeStatementImage() {
+  html2canvas(table3).then(function(canvas) {
+    const image = canvas.toDataURL('image/png');
+
+    const imageBase64 = image.split(',')[1];
+
+    const emailInfo = {
+        to_email: 'robertsoncaden02@gmail.com',
+        subject: 'Trial Balance Sheet',
+        message: 'Here is a picture of the Trial Balance Sheet (This does work, but I do not want to spend money for attachments)',
+        attachment: imageBase64
+    };
+
+    emailjs.send('service_uhjncdn', 'template_57xcxk7', emailInfo)
+           .then((response) => {
+             alert('Email sent successfully!', response);
+            })
+            .catch((error) => {
+              alert('Error sending email:', error);
+            });
+  });
+}
+
+emailIncomeStatementButton.addEventListener('click', emailIncomeStatementImage);
+
+const printIncomeStatementButton = document.getElementById('PrintIncomeStatement')
+
+function printIncomeStatementImage() {
+  html2canvas(table3).then(function (canvas) {
+    const image = canvas.toDataURL('image/png');
+
+    // Create a new window to display the image for printing
+    const printWindow = window.open('', '', 'width=600,height=600');
+    printWindow.document.open();
+    printWindow.document.write(
+      `<img src="${image}" style="width:100%;" />`
+    );
+    printWindow.document.close();
+
+    // Wait for the image to load before triggering the print
+    printWindow.addEventListener('load', function () {
+      printWindow.print();
+      printWindow.close();
+    });
+  });
+}
+
+// Add a click event listener to the "Print Trial Balance" button
+printIncomeStatementButton.addEventListener('click', printIncomeStatementImage);
+
+//-----------------------------------------------------------------------------------------------------------
 
 
     document.querySelectorAll(".form__input").forEach(inputElement => {
