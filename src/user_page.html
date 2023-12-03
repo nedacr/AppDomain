@@ -21,8 +21,35 @@
   <div class="container">
     <form class="form" id="mainPage">
     <h2>Main Content</h2>
-    <p>This is the main content of your webpage contained within a container.</p>
-    <p>Content Goes Here</p>
+    <div class="alerts" id="alertsWrapper">
+      <h2 class="alertTitle">Important Messages:</h2>
+      <div id="alertWrapper">
+        <p id="alertMessage">This is a Placeholder</p>
+      </div>
+    </div>
+    <div class="ratios" id="ratioDiv">
+      <h2 class="ratiotitle" id="ratiotitle">Financial Ratios:</h2>
+      <div class="liquidratio">
+        <h3 class="liquidRatioTitle">Liquidity Ratios:</h3>
+        <p class="currentRatio" id="currentRatio"></p>
+        <p class="cashRatio" id="cashRatio"></p>
+      </div>
+      <div class="ratio">
+        <h3 class="financialLeverageRatio">Financial Leverage Ratios:</h3>
+        <p class="debtRatio" id="debtRatio"></p>
+        <p class="returnAssetsRatio" id="returnAssetsRatio"></p>
+        
+      </div>
+      
+    </div>
+    
+    
+    
+
+
+
+
+    
 
     <input type="date" id="startDateInput">
     <input type="date" id="endDateInput">
@@ -657,7 +684,7 @@
 
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-  import { getDatabase, set, ref, update, get, remove, runTransaction } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+  import { getDatabase, set, ref, update, get, remove, runTransaction, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
   import { getStorage, ref as storageRef, uploadBytes, getDownloadURL} from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js';
   const firebaseConfig = {
@@ -877,6 +904,112 @@
         tableHeader.textContent = 'Normal Entries'; // Change the header text
       }
     });
+
+    //-----------------------------------------------------------------------------------------------------
+    async function getTotalJournalsWithPermissionOne() {
+  try {
+    // Reference to the "journalentries" node in the database
+    const journalEntriesRef = ref(getDatabase(), 'journalentries');
+
+    // Query to filter entries with permission value of 1
+    const permissionOneQuery = query(journalEntriesRef, orderByChild('permission'), equalTo(1));
+
+    // Get the snapshot of entries with permission 1
+    const permissionOneSnapshot = await get(permissionOneQuery);
+
+    // Get the number of entries with permission 1
+    const totalJournalsWithPermissionOne = permissionOneSnapshot.size;
+
+    // Display the total count (you can modify this part based on your UI)
+    console.log('Total Journals with Permission 1:', totalJournalsWithPermissionOne);
+
+    
+
+    // You can return the count or use it as needed in your application
+    return totalJournalsWithPermissionOne;
+  } catch (error) {
+    console.error('Error getting total journals with permission 1:', error);
+    throw error;
+  }
+}
+
+
+async function updateAlertMessage() {
+  try {
+    const totalJournalsWithPermissionOne = await getTotalJournalsWithPermissionOne();
+
+    // Get the alert message and its wrappers
+    const alertsWrapper = document.getElementById('alertsWrapper');
+    const alertWrapper = document.getElementById('alertWrapper');
+    const alertMessageElement = document.getElementById('alertMessage');
+
+    // Update the content of the element
+    alertMessageElement.textContent = `There are ${totalJournalsWithPermissionOne} Journals waiting for approval!`;
+
+    // Apply styles based on the number of accounts with permission 1
+    if (totalJournalsWithPermissionOne < 5) {
+      alertsWrapper.style.backgroundColor = '#f0f0f0'; // Very light grey background
+      alertWrapper.style.backgroundColor = 'yellow';
+      alertMessageElement.style.color = 'black'; // Adjust text color as needed
+    } else {
+      alertsWrapper.style.backgroundColor = '#f0f0f0'; // Very light grey background
+      alertWrapper.style.backgroundColor = 'red';
+      alertMessageElement.style.color = 'white'; // Adjust text color as needed
+    }
+  } catch (error) {
+    console.error('Error updating alert message:', error);
+    // Handle the error as needed
+  }
+}
+
+// Call the function to update the alert message
+updateAlertMessage();
+//--------------------------------------------------------------------------------------------------------
+// Function to update financial ratios
+// Function to update financial ratios
+function updateFinancialRatios() {
+  // Hardcoded values for the ratios (you can replace these with your actual values)
+  const currentRatioValue = 2000;
+  const cashRatioValue = 0.8;
+  const debtRatioValue = 0.6; // Adjusted value for illustration
+  const returnAssetsRatioValue = 0.8;
+
+  // Get the elements
+  const currentRatioElement = document.getElementById('currentRatio');
+  const cashRatioElement = document.getElementById('cashRatio');
+  const debtRatioElement = document.getElementById('debtRatio');
+  const returnAssetsRatioElement = document.getElementById('returnAssetsRatio');
+
+  // Update the values of the paragraphs
+  currentRatioElement.textContent = `Current Ratio: ${currentRatioValue}`;
+  cashRatioElement.textContent = `Cash Ratio: ${cashRatioValue}`;
+  debtRatioElement.textContent = `Debt Ratio: ${debtRatioValue}`;
+  returnAssetsRatioElement.textContent = `Return on Assets Ratio: ${returnAssetsRatioValue}`;
+
+  // Apply background color based on the specified conditions
+  setBackground(currentRatioElement, currentRatioValue, 0, 5000);
+  setBackground(cashRatioElement, cashRatioValue, 0.5, 0.75);
+  setBackground(debtRatioElement, debtRatioValue, 0.5, 0.75);
+  setBackground(returnAssetsRatioElement, returnAssetsRatioValue, 0.5, 0.75);
+}
+
+// Helper function to apply background color based on conditions
+function setBackground(element, value, warningThreshold, goodThreshold) {
+  if (value < warningThreshold) {
+    element.style.backgroundColor = 'red';
+  } else if (value <= goodThreshold) {
+    element.style.backgroundColor = 'yellow';
+  } else {
+    element.style.backgroundColor = 'green';
+  }
+}
+
+// Call the function to update financial ratios and apply background color
+updateFinancialRatios();
+
+
+
+
 
     //---------------------------------------------------------------------------------------------------
 //sheet information
@@ -1582,7 +1715,7 @@ printIncomeStatementButton.addEventListener('click', printIncomeStatementImage);
   // Add the date and permission value (2) to the journalData object
   journalData['date'] = currentDate;
   journalData['permission'] = 1;
-  journalData['approval'] = userIDHolder;
+  journalData['approval'] = 'empty';
   journalData['description'] = journalDescription;
   journalData['EntryType'] = entryType;
 
@@ -1824,7 +1957,7 @@ async function displayJournalEntries() {
 // Helper function to get account names separated by commas
 function getAccountNames(entry) {
   return Object.keys(entry)
-    .filter(key => key !== 'date' && key !== 'permission' && key !== 'approval' && key !== 'description')
+    .filter(key => key !== 'date' && key !== 'permission' && key !== 'approval' && key !== 'description' && key !== 'EntryType')
     .join(', ');
 }
 
@@ -1936,7 +2069,7 @@ getDownloadURL(fileRef)
 
         // Iterate through the accounts and display them in the table
         for (const account in entryData) {
-          if (account !== 'date' && account !== 'permission' && account !== 'approval' && account !== 'description') {
+          if (account !== 'date' && account !== 'permission' && account !== 'approval' && account !== 'description' && account !== 'EntryType') {
             const accountRow = document.createElement('tr');
             accountRow.innerHTML = `
               <td>${account}</td>
